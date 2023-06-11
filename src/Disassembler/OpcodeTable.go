@@ -100,7 +100,7 @@ func OpCodeTable() {
 				PC += 1
 
 			case 0x13:
-				fmt.Printf("INC (DE),A\n")
+				fmt.Printf("INC (DE)\n")
 				PC += 1
 
 			case 0x14:
@@ -573,7 +573,7 @@ func OpCodeTable() {
 			switch rom[PC] {
 			case 0xE0:
 				addr := rom[PC+1]
-				fmt.Printf("LDH ($%x),A\n", addr)
+				fmt.Printf("LD ($FFOO+$%x),A\n", addr)
 				PC += 2
 
 			case 0xE1:
@@ -581,7 +581,7 @@ func OpCodeTable() {
 				PC += 1
 
 			case 0xE2:
-				fmt.Printf("LD (C),A\n")
+				fmt.Printf("LD ($FF00+C),A\n")
 				PC += 1
 
 			case 0xE3:
@@ -640,7 +640,7 @@ func OpCodeTable() {
 			switch rom[PC] {
 			case 0xF0:
 				addr := rom[PC+1]
-				fmt.Printf("LDH A,($%x)\n", addr)
+				fmt.Printf("LD A,($FF00+%x)\n", addr)
 				PC += 2
 
 			case 0xF1:
