@@ -66,28 +66,30 @@ func (s *CPU) ResetIFBit(offset int) { // Reset interrupt flag bit
 
 func (s *CPU) InterruptHandler() { // Interrupt handler
 	if s.GetIMEVal() {
-		if s.GetIEVal()>>0&1 == 1 { // VBlank
+		if s.GetIEVal()>>0&1 == 1 && s.GetIFVal()>>0&1 == 1 { // VBlank
 			s.CALLN8(0x40)
 			s.ResetIFBit(0)
+			s.RETI()
 
-		} else if s.GetIEVal()>>1&1 == 1 { // LCD STAT
+		} else if s.GetIEVal()>>1&1 == 1 && s.GetIFVal()>>1&1 == 1 { // LCD STAT
 			s.CALLN8(0x48)
 			s.ResetIFBit(1)
 
-		} else if s.GetIEVal()>>2&1 == 1 { // Timer
+		} else if s.GetIEVal()>>2&1 == 1 && s.GetIFVal()>>2&1 == 1 { // Timer
 			s.CALLN8(0x50)
 			s.ResetIFBit(2)
+			s.RETI()
 
-		} else if s.GetIEVal()>>3&1 == 1  { // Serial
+		} else if s.GetIEVal()>>3&1 == 1 && s.GetIFVal()>>3&1 == 1 { // Serial
 			s.CALLN8(0x58)
 			s.ResetIFBit(3)
+			s.RETI()
 
-		} else if s.GetIEVal()>>4&1 == 1 { // Joypad
+		} else if s.GetIEVal()>>4&1 == 1 && s.GetIFVal()>>4&1 == 1 { // Joypad
 			s.CALLN8(0x60)
 			s.ResetIFBit(4)
-
+			s.RETI()
 		}
-		s.RETI()
 		s.ResetIMEval()
 	}
 }

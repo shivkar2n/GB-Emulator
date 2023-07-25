@@ -30,5 +30,5 @@ func (s *CPU) NOP() {
 }
 
 func (s *CPU) HALT() {
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.StopExec = true
 }

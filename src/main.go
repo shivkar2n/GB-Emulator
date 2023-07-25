@@ -2,7 +2,7 @@ package main
 
 import (
 	CPU "github.com/shivkar2n/GB-Emulator/CPU"
-	Disasembler "github.com/shivkar2n/GB-Emulator/Disassembler"
+	Dissasembler "github.com/shivkar2n/GB-Emulator/Disassembler"
 )
 
 func main() {
@@ -15,6 +15,7 @@ func main() {
 	c.PC = [2]byte{byte(0x00), byte(0x01)}
 	c.ED = [2]byte{byte(0xD8), byte(0x00)}
 	c.Mem[0xFF44] = byte(0x90)
+	c.Mem[0xFF0F] = byte(0xE0)
 
-	Disasembler.OpCodeTable(c)
+	Dissasembler.OpCodeTable(c)
 }

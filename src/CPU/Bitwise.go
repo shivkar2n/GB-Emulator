@@ -1,13 +1,13 @@
 package CPU
 
-func (s *CPU) BITU3R8(offset int, reg string) {
+func (s *CPU) BITU3R8(offset int, reg string) { // if reg[] >> u3 == 0 then setZeroFlag
 	val := (s.GetReg8Val(reg) >> offset) & 0x01
 	s.SetFlagBIT(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
 }
 
-func (s *CPU) BITU3HL(offset int) { // if reg[] >> u3 == 0 then setZeroFlag
-	val := s.GetHLVal() >> offset
+func (s *CPU) BITU3HL(offset int) { // if M[reg[HL]] >> u3 == 0 then setZeroFlag
+	val := (s.GetHLVal() >> offset) &0x01
 	s.SetFlagBIT(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
 }
@@ -67,7 +67,7 @@ func (s *CPU) SWAPHL() { // Swap upper, lower 4 bits in mem[reg[HL]]
 	low := s.GetHLVal() & 0xF
 	high := (s.GetHLVal() & 0xF0) >> 4
 	val := low<<4 | high
-	s.Mem[s.GetReg16Val("HL")] = byte(val)
+	s.SetHLVal(val)
 	s.SetFlagSWAP(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
 }
