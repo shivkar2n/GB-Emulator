@@ -6,6 +6,7 @@ func (s *CPU) RLR8(reg string) { // Rotate bits reg[] left through Flag C
 	s.SetReg8Val(reg, val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) RLHL() { // Rotate bits M[reg[HL]] left through Flag C
@@ -14,6 +15,7 @@ func (s *CPU) RLHL() { // Rotate bits M[reg[HL]] left through Flag C
 	s.SetHLVal(val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(16, 4)
 }
 
 func (s *CPU) RLA() { // Rotate bits reg[A] left through Flag C
@@ -22,6 +24,7 @@ func (s *CPU) RLA() { // Rotate bits reg[A] left through Flag C
 	s.SetReg8Val("A", val)
 	s.SetFlagRL(1, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) RLCR8(reg string) { // Rotate bits reg[A] left through Flag c
@@ -30,6 +33,7 @@ func (s *CPU) RLCR8(reg string) { // Rotate bits reg[A] left through Flag c
 	s.SetReg8Val(reg, val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) RLCHL() { // Rotate bits M[reg[HL]] left through flag C
@@ -38,6 +42,7 @@ func (s *CPU) RLCHL() { // Rotate bits M[reg[HL]] left through flag C
 	s.SetHLVal(val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(16, 4)
 }
 
 func (s *CPU) RLCA() { // Rotate bits reg[A] left
@@ -46,6 +51,7 @@ func (s *CPU) RLCA() { // Rotate bits reg[A] left
 	s.SetReg8Val("A", val)
 	s.SetFlagRL(1, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) RRR8(reg string) { // Rotate bits reg[] right through flag C
@@ -54,6 +60,7 @@ func (s *CPU) RRR8(reg string) { // Rotate bits reg[] right through flag C
 	s.SetReg8Val(reg, val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) RRHL() { // Rotate bits M[reg[HL]] right through flag C
@@ -62,6 +69,7 @@ func (s *CPU) RRHL() { // Rotate bits M[reg[HL]] right through flag C
 	s.SetHLVal(val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(16, 4)
 }
 
 func (s *CPU) RRA() { // Rotate bits reg[A] right through flag C
@@ -70,6 +78,7 @@ func (s *CPU) RRA() { // Rotate bits reg[A] right through flag C
 	s.SetReg8Val("A", val)
 	s.SetFlagRL(1, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) RRCR8(reg string) { // Rotate reg[] right
@@ -78,6 +87,7 @@ func (s *CPU) RRCR8(reg string) { // Rotate reg[] right
 	s.SetReg8Val(reg, val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) RRCHL() { // Rotate M[reg[HL]] right
@@ -86,6 +96,7 @@ func (s *CPU) RRCHL() { // Rotate M[reg[HL]] right
 	s.SetHLVal(val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(16, 4)
 }
 
 func (s *CPU) RRCA() { // Rotate reg[A] right
@@ -94,6 +105,7 @@ func (s *CPU) RRCA() { // Rotate reg[A] right
 	s.SetReg8Val("A", val)
 	s.SetFlagRL(1, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) SLAR8(reg string) { // reg[] = reg[] << 1
@@ -102,6 +114,7 @@ func (s *CPU) SLAR8(reg string) { // reg[] = reg[] << 1
 	s.SetReg8Val(reg, val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) SLAHL() { // M[reg[HL]] = M[reg[HL]] << 1
@@ -110,6 +123,7 @@ func (s *CPU) SLAHL() { // M[reg[HL]] = M[reg[HL]] << 1
 	s.SetHLVal(val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(16, 4)
 }
 
 func (s *CPU) SRAR8(reg string) { // reg[] = reg[] >> 1, bit 7 unchanged
@@ -118,6 +132,7 @@ func (s *CPU) SRAR8(reg string) { // reg[] = reg[] >> 1, bit 7 unchanged
 	s.SetReg8Val(reg, val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) SRAHL() { // M[reg[HL]] = M[reg[HL]] >> 1, bit 7 unchanged
@@ -126,6 +141,7 @@ func (s *CPU) SRAHL() { // M[reg[HL]] = M[reg[HL]] >> 1, bit 7 unchanged
 	s.SetHLVal(val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(16, 4)
 }
 
 func (s *CPU) SRLR8(reg string) { // reg[] = reg[] >> 1
@@ -134,6 +150,7 @@ func (s *CPU) SRLR8(reg string) { // reg[] = reg[] >> 1
 	s.SetReg8Val(reg, val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) SRLHL() { // M[reg[HL]] = M[reg[HL]] >> 1
@@ -142,4 +159,5 @@ func (s *CPU) SRLHL() { // M[reg[HL]] = M[reg[HL]] >> 1
 	s.SetHLVal(val)
 	s.SetFlagRL(val, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(16, 4)
 }

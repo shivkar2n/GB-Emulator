@@ -27,8 +27,10 @@ func (s *CPU) CCF() { // Flag[C] = ~Flag[C]
 
 func (s *CPU) NOP() {
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) HALT() {
 	s.StopExec = true
+	s.SetClockTime(4, 1)
 }

@@ -10,6 +10,7 @@ func (s *CPU) ADCAR8(reg string) { // reg[A] = reg[A] + C + reg[]
 	s.SetReg8Val("A", val)
 	s.SetFlagADD(halfcarry, carry, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) ADCAHL() { // reg[A] = reg[A] + C + M[reg[HL]]
@@ -19,6 +20,7 @@ func (s *CPU) ADCAHL() { // reg[A] = reg[A] + C + M[reg[HL]]
 	s.SetReg8Val("A", val)
 	s.SetFlagADD(halfcarry, carry, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) ADCAN8() { // reg[A] = reg[A] + n8 + C
@@ -29,6 +31,7 @@ func (s *CPU) ADCAN8() { // reg[A] = reg[A] + n8 + C
 	s.SetReg8Val("A", val)
 	s.SetFlagADD(halfcarry, carry, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) ADDAR8(reg string) { // reg[A] = reg[A] + reg[]
@@ -40,6 +43,7 @@ func (s *CPU) ADDAR8(reg string) { // reg[A] = reg[A] + reg[]
 	s.SetReg8Val("A", val)
 	s.SetFlagADD(halfcarry, carry, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) ADDAHL() { // reg[A] = reg[A] + M[reg[HL]]
@@ -49,6 +53,7 @@ func (s *CPU) ADDAHL() { // reg[A] = reg[A] + M[reg[HL]]
 	s.SetReg8Val("A", val)
 	s.SetFlagADD(halfcarry, carry, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) ADDAN8() { // reg[A] = reg[A] + n8
@@ -59,6 +64,7 @@ func (s *CPU) ADDAN8() { // reg[A] = reg[A] + n8
 	s.SetReg8Val("A", val)
 	s.SetFlagADD(halfcarry, carry, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) ANDAR8(reg string) { // reg[A] = reg[A] & reg[]
@@ -67,6 +73,7 @@ func (s *CPU) ANDAR8(reg string) { // reg[A] = reg[A] & reg[]
 	s.SetReg8Val("A", val)
 	s.SetFlagAND(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) ANDAHL() { // reg[A] = reg[A] & M[HL]
@@ -74,6 +81,7 @@ func (s *CPU) ANDAHL() { // reg[A] = reg[A] & M[HL]
 	s.SetReg8Val("A", val)
 	s.SetFlagAND(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) ANDAN8() { // reg[A] = reg[A] & n8
@@ -82,6 +90,7 @@ func (s *CPU) ANDAN8() { // reg[A] = reg[A] & n8
 	s.SetReg8Val("A", val)
 	s.SetFlagAND(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) CPAR8(reg string) { // res = reg[A] - reg[]
@@ -91,6 +100,7 @@ func (s *CPU) CPAR8(reg string) { // res = reg[A] - reg[]
 	val := int(int8(s.GetReg8Val("A") - regVal))
 	s.SetFlagCP(halfBorrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) CPAHL() { // res = reg[A] - M[HL]
@@ -99,6 +109,7 @@ func (s *CPU) CPAHL() { // res = reg[A] - M[HL]
 	val := int(int8(s.GetReg8Val("A") - s.GetHLVal()))
 	s.SetFlagCP(halfBorrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) CPAN8() { // res = reg[A] - n8
@@ -108,6 +119,7 @@ func (s *CPU) CPAN8() { // res = reg[A] - n8
 	val := int(int8(s.GetReg8Val("A") - op))
 	s.SetFlagCP(halfBorrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) DAA() { // res = reg[A] - n8
@@ -134,6 +146,7 @@ func (s *CPU) DAA() { // res = reg[A] - n8
 	}
 	s.ResetFlag("H")
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) DECR8(reg string) { // reg[] = reg[] - 1
@@ -142,6 +155,7 @@ func (s *CPU) DECR8(reg string) { // reg[] = reg[] - 1
 	s.SetFlagDEC(halfBorrow, val)
 	s.SetReg8Val(reg, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) DECHL() { // M[HL] = M[HL] - 1
@@ -150,6 +164,7 @@ func (s *CPU) DECHL() { // M[HL] = M[HL] - 1
 	s.SetHLVal(val)
 	s.SetFlagDEC(halfBorrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(12, 3)
 }
 
 func (s *CPU) INCR8(reg string) { // reg[] = reg[] + 1
@@ -158,6 +173,7 @@ func (s *CPU) INCR8(reg string) { // reg[] = reg[] + 1
 	s.SetReg8Val(reg, val)
 	s.SetFlagINC(halfcarry, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) INCRHL() { // M[HL] = M[HL] + 1
@@ -166,6 +182,7 @@ func (s *CPU) INCRHL() { // M[HL] = M[HL] + 1
 	s.SetHLVal(val)
 	s.SetFlagINC(halfcarry, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(12, 3)
 }
 
 func (s *CPU) ORAR8(reg string) { // reg[A] = reg[A] | reg[]
@@ -173,6 +190,7 @@ func (s *CPU) ORAR8(reg string) { // reg[A] = reg[A] | reg[]
 	s.SetReg8Val("A", val)
 	s.SetFlagOR(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) ORAHL() { // reg[A] = M[HL] | reg[A]
@@ -180,6 +198,7 @@ func (s *CPU) ORAHL() { // reg[A] = M[HL] | reg[A]
 	s.SetReg8Val("A", val)
 	s.SetFlagOR(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) ORAN8() { // reg[A] = reg[A] | n8
@@ -188,6 +207,7 @@ func (s *CPU) ORAN8() { // reg[A] = reg[A] | n8
 	s.SetReg8Val("A", val)
 	s.SetFlagOR(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) SUBAR8(reg string) { // reg[A] = reg[A] - reg[]
@@ -198,6 +218,7 @@ func (s *CPU) SUBAR8(reg string) { // reg[A] = reg[A] - reg[]
 	s.SetReg8Val("A", val)
 	s.SetFlagSUB(halfborrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) SUBAHL() { // reg[A] = reg[A] - M[HL]
@@ -207,6 +228,7 @@ func (s *CPU) SUBAHL() { // reg[A] = reg[A] - M[HL]
 	s.SetReg8Val("A", val)
 	s.SetFlagSUB(halfborrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) SUBAN8() { // reg[A] = reg[A] - n8
@@ -217,6 +239,7 @@ func (s *CPU) SUBAN8() { // reg[A] = reg[A] - n8
 	s.SetReg8Val("A", val)
 	s.SetFlagSUB(halfborrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) SBCAR8(reg string) { // reg[A] = reg[A] - reg[] - C
@@ -227,6 +250,7 @@ func (s *CPU) SBCAR8(reg string) { // reg[A] = reg[A] - reg[] - C
 	s.SetReg8Val("A", val)
 	s.SetFlagSUB(halfborrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) SBCAHL() { // reg[A] = reg[A] - M[HL] - C
@@ -236,6 +260,7 @@ func (s *CPU) SBCAHL() { // reg[A] = reg[A] - M[HL] - C
 	s.SetReg8Val("A", val)
 	s.SetFlagSUB(halfborrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) SBCAN8() { // reg[A] = reg[A] - n8 - C
@@ -246,6 +271,7 @@ func (s *CPU) SBCAN8() { // reg[A] = reg[A] - n8 - C
 	s.SetReg8Val("A", val)
 	s.SetFlagSUB(halfborrow, borrow, val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) XORAR8(reg string) { // reg[A] = reg[A] ^ reg[]
@@ -253,6 +279,7 @@ func (s *CPU) XORAR8(reg string) { // reg[A] = reg[A] ^ reg[]
 	s.SetReg8Val("A", val)
 	s.SetFlagOR(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) XORAHL() { // reg[A] = reg[A] ^ M[HL]
@@ -260,6 +287,7 @@ func (s *CPU) XORAHL() { // reg[A] = reg[A] ^ M[HL]
 	s.SetReg8Val("A", val)
 	s.SetFlagOR(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) XORAN8() { // reg[A] = reg[A] ^ op
@@ -268,6 +296,7 @@ func (s *CPU) XORAN8() { // reg[A] = reg[A] ^ op
 	s.SetReg8Val("A", val)
 	s.SetFlagOR(val)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
+	s.SetClockTime(8, 2)
 }
 
 // Opcodes for 16-bit ALU instructions
@@ -287,14 +316,17 @@ func (s *CPU) ADDHLR16(reg string) { // reg[HL] = reg[r16] + reg[HL]
 	s.SetReg16Val("HL", int(uint16(val)))
 	s.SetFlagADD16(halfcarry, carry)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) DECR16(reg string) { // reg[r16] = reg[r16] - 1
 	s.SetReg16Val(reg, int(int16(s.GetReg16Val(reg)-1)))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) INCR16(reg string) { // reg[r16] = reg[r16] + 1
 	s.SetReg16Val(reg, int(int16(s.GetReg16Val(reg)+1)))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(8, 2)
 }

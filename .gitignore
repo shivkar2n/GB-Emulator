@@ -3,5 +3,5 @@
 .vscode
 testroms
 build/GB-Emulator
-logs/state.log
-logs/debug.log
+build/*.gb
+logs/*.log

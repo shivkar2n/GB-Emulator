@@ -1,37 +1,23 @@
 package CPU
 
+import "log"
+
 func (s *CPU) EI() {
-	s.SetIMEval()
+	s.IME = true
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 }
 
 func (s *CPU) DI() {
-	s.ResetIMEval()
+	s.IME = false
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 }
 
-func (s *CPU) SetIMEval() {
-	s.IME = true
+func (s *CPU) GetIEBit(pos int) int { // Get interrupt enable
+	return (int(s.Mem[0xFFFF]) >> pos) & 1
 }
 
-func (s *CPU) ResetIMEval() {
-	s.IME = false
-}
-
-func (s *CPU) GetIMEVal() bool { // Get interrupt master enable flag
-	return s.IME
-}
-
-func (s *CPU) GetIEVal() int { // Get interrupt enable
-	return int(s.Mem[0xFFFF])
-}
-
-func (s *CPU) SetIEVal(op int) { // Set interrupt enable
-	s.Mem[0xFFFF] = byte(op)
-}
-
-func (s *CPU) GetIFVal() int { // Get interrupt flag
-	return int(s.Mem[0xFF0F])
+func (s *CPU) GetIFBit(pos int) int { // Get interrupt flag
+	return (int(s.Mem[0xFF0F]) >> pos) & 1
 }
 
 func (s *CPU) SetIEBit(op int) { // Set interrupt enable bit
@@ -50,7 +36,7 @@ func (s *CPU) ResetIEBit(offset int) { // Reset interrupt enable bit
 }
 
 func (s *CPU) SetIFBit(op int) { // Set interrupt flag bit
-	s.Mem[0xFF0F] = byte(s.Mem[0xFF0F] | 1<<op)
+	s.Mem[0xFF0F] = byte(int(s.Mem[0xFF0F]) | 1<<op)
 }
 
 func (s *CPU) ResetIFBit(offset int) { // Reset interrupt flag bit
@@ -64,32 +50,45 @@ func (s *CPU) ResetIFBit(offset int) { // Reset interrupt flag bit
 	s.Mem[0xFF0F] = byte(int(s.Mem[0xFF0F]) & k)
 }
 
-func (s *CPU) InterruptHandler() { // Interrupt handler
-	if s.GetIMEVal() {
-		if s.GetIEVal()>>0&1 == 1 && s.GetIFVal()>>0&1 == 1 { // VBlank
+// func (s *CPU) InterruptHandler(stateLog *log.Logger, log *log.Logger) { // Interrupt handler
+func (s *CPU) InterruptHandler(stateLog *log.Logger) {
+	// log.Printf("IME:%t IF:%X IE:%X\n", s.IME, s.Mem[0xFF0F], s.Mem[0xFFFF])
+	if s.IME {
+
+		if s.GetIEBit(0) == 1 && s.GetIFBit(0) == 1 { // VBlank
+			s.IME = false
+			// log.Printf("V-Blank Interrupt!\t")
 			s.CALLN8(0x40)
 			s.ResetIFBit(0)
-			s.RETI()
+			s.SetClockTime(4, 1)
 
-		} else if s.GetIEVal()>>1&1 == 1 && s.GetIFVal()>>1&1 == 1 { // LCD STAT
+		} else if s.GetIEBit(1) == 1 && s.GetIFBit(1) == 1 { // LCD STAT
+			s.IME = false
+			// log.Printf("LCD Interrupt!\t")
 			s.CALLN8(0x48)
 			s.ResetIFBit(1)
+			s.SetClockTime(4, 1)
 
-		} else if s.GetIEVal()>>2&1 == 1 && s.GetIFVal()>>2&1 == 1 { // Timer
+		} else if s.GetIEBit(2) == 1 && s.GetIFBit(2) == 1 { // Timer
+			s.IME = false
+			// log.Printf("Timer Interrupt!\t")
 			s.CALLN8(0x50)
 			s.ResetIFBit(2)
-			s.RETI()
+			s.SetClockTime(4, 1)
 
-		} else if s.GetIEVal()>>3&1 == 1 && s.GetIFVal()>>3&1 == 1 { // Serial
+		} else if s.GetIEBit(3) == 1 && s.GetIFBit(3) == 1 { // Serial
+			s.IME = false
+			// log.Printf("Serial Interrupt!\t")
 			s.CALLN8(0x58)
 			s.ResetIFBit(3)
-			s.RETI()
+			s.SetClockTime(4, 1)
 
-		} else if s.GetIEVal()>>4&1 == 1 && s.GetIFVal()>>4&1 == 1 { // Joypad
+		} else if s.GetIEBit(4) == 1 && s.GetIFBit(4) == 1 { // Joypad
+			s.IME = false
+			// log.Printf("Joypad Interrupt!\t")
 			s.CALLN8(0x60)
 			s.ResetIFBit(4)
-			s.RETI()
+			s.SetClockTime(4, 1)
 		}
-		s.ResetIMEval()
 	}
 }

@@ -9,24 +9,35 @@ import (
 type CPU struct {
 	FA, CB, ED, LH, PC, SP [2]byte
 	Mem                    [65536]byte
+	T, M, Sysclk, TIMA     int
+	TotalT, TotalM         int
 	IME                    bool
 	StopExec               bool
-	PrevCycle              int
+	ClkRate, FrameRate     int
 }
 
 func InitCPU() *CPU {
 	c := CPU{
-		FA:        [2]byte{},
-		CB:        [2]byte{},
-		ED:        [2]byte{},
-		LH:        [2]byte{},
-		PC:        [2]byte{},
-		SP:        [2]byte{},
+		FA:        [2]byte{byte(0xB0), byte(0x01)},
+		CB:        [2]byte{byte(0x13), byte(0x00)},
+		LH:        [2]byte{byte(0x4D), byte(0x01)},
+		SP:        [2]byte{byte(0xFE), byte(0xFF)},
+		PC:        [2]byte{byte(0x00), byte(0x01)},
+		ED:        [2]byte{byte(0xD8), byte(0x00)},
 		Mem:       [65536]byte{},
 		IME:       false,
 		StopExec:  false,
-		PrevCycle: 0,
+		T:         0,
+		M:         0,
+		TIMA:      0,
+		TotalT:    0,
+		TotalM:    0,
+		Sysclk:    0,
+		ClkRate:   4194304,
+		FrameRate: 60,
 	}
+	c.Mem[0xFF44] = byte(0x90)
+	c.Mem[0xFF0F] = byte(0xE0)
 	return &c
 }
 
@@ -67,13 +78,6 @@ func (s *CPU) SetFlag(flagType string) { // Check if flag bit set to 0, then cha
 	}
 }
 
-func (s *CPU) MemInfo() {
-	for i := 0; i < 0xFFFF; i += 16 {
-		fmt.Printf("%04X: %02X %02X %02X %02X %02X %02X %02X %02X", i, s.Mem[i], s.Mem[i+1], s.Mem[i+2], s.Mem[i+3], s.Mem[i+4], s.Mem[i+5], s.Mem[i+6], s.Mem[i+7])
-		fmt.Printf(" %02X %02X %02X %02X %02X %02X %02X %02X\n", s.Mem[i+8], s.Mem[i+9], s.Mem[i+10], s.Mem[i+11], s.Mem[i+12], s.Mem[i+13], s.Mem[i+14], s.Mem[i+15])
-	}
-}
-
 func (s *CPU) StateInfo(log *log.Logger) { // Get info about state of CPU
 	a := s.GetReg8Val("A")
 	f := s.GetReg8Val("F")
@@ -89,13 +93,25 @@ func (s *CPU) StateInfo(log *log.Logger) { // Get info about state of CPU
 	pcMem1 := s.Mem[s.GetReg16Val("PC")+1]
 	pcMem2 := s.Mem[s.GetReg16Val("PC")+2]
 	pcMem3 := s.Mem[s.GetReg16Val("PC")+3]
-	// log.Printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
-	// log.Printf("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
+	div := s.Mem[0xFF04]
+	tima := s.Mem[0xFF05]
+	tma := s.Mem[0xFF06]
+	tac := s.Mem[0xFF07]
+	var ime int
+	if s.IME {
+		ime = 0
+	} else {
+		ime = 0
+	}
+	ie := s.Mem[0xFFFF]
+	ifl := s.Mem[0xFF0F]
 
-	log.Printf("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X ", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
-	// log.Printf(" Mem[DEF6]: %02X\n", s.Mem[0xDEF6])
-	// log.Printf("Mem[AF]:%02X Mem[BC]:%02X Mem[DE]:%02X Mem[HL]:%02X Mem[SP]:%04X\n", s.Mem[s.GetReg16Val("AF")], s.Mem[s.GetReg16Val("BC")], s.Mem[s.GetReg16Val("DE")], s.Mem[s.GetReg16Val("HL")], s.Mem[s.GetReg16Val("SP")])
-	// log.Printf("DIV: %02X TIMA: %02X TMA: %02X TAC: %02X\n", s.Mem[0xFF04], s.Mem[0xFF05], s.Mem[0xFF06], s.Mem[0xFF07])
+	// log.Printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
+	log.Printf("TIMA: %02X TMA: %02X DIV: %02X TAC: %02X IME: %02X IE: %02X IF: %02X A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", div, tima, tma, tac, ime, ie, ifl, a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
+}
+
+func (s *CPU) TimerInfo(log *log.Logger) { // Get info about state of CPU
+	log.Printf("Total-M:%d Total-T:%d DIV:%x TIMA:%x TMA:%x TAC:%x\n", s.TotalM, s.TotalT, s.Mem[0xFF04], s.Mem[0xFF05], s.Mem[0xFF06], s.Mem[0xFF07])
 }
 
 func (s *CPU) GetReg8Val(name string) int { // Get value of 8-bit register
@@ -212,8 +228,20 @@ func (s *CPU) checkCC(cc string) bool { // Check condition
 	return false
 }
 
+func (s *CPU) SetClockTime(t int, m int) {
+	s.T = t
+	s.M = m
+}
+
 func (s *CPU) LoadROM() { // Load ROM into memory
 	fileName := os.Args[1]
 	rom, _ := os.ReadFile(fileName)
 	copy(s.Mem[:], rom)
+}
+
+func (s *CPU) LogSerialIO() {
+	if s.Mem[0xFF02] == 0x81 {
+		fmt.Printf("%c", s.Mem[0xFF01])
+		s.Mem[0xFF02] = 0x00
+	}
 }
