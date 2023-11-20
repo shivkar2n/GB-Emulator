@@ -7,13 +7,13 @@ import (
 func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 	s.StateInfo(stateLog) // Log CPU State info
 
-	switch s.Mem[s.GetReg16Val("PC")] {
+	switch s.Mem.Read(s.GetReg16Val("PC")) {
 	case 0x00:
 		log.Printf("NOP\n")
 		s.NOP()
 
 	case 0x01:
-		log.Printf("LD BC,$%x \n", uint16(int(s.Mem[s.GetReg16Val("PC")+1])+(int(s.Mem[s.GetReg16Val("PC")+2])<<8)))
+		log.Printf("LD BC,$%x \n", uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1))+(int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8)))
 		s.LDR16N16("BC")
 
 	case 0x02:
@@ -33,7 +33,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DECR8("B")
 
 	case 0x06:
-		log.Printf("LD B,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD B,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDR8N8("B")
 
 	case 0x07:
@@ -41,7 +41,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RLCA()
 
 	case 0x08:
-		log.Printf("LD (%x), SP\n", int(s.Mem[s.GetReg16Val("PC")+1])+(int(s.Mem[s.GetReg16Val("PC")+2])<<8))
+		log.Printf("LD (%x), SP\n", int(s.Mem.Read(s.GetReg16Val("PC")+1))+(int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8))
 		s.LDN16SP()
 
 	case 0x09:
@@ -65,7 +65,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DECR8("C")
 
 	case 0x0E:
-		log.Printf("LD C, $%x\n", int(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD C, $%x\n", int(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDR8N8("C")
 
 	case 0x0F:
@@ -73,10 +73,10 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RRCA()
 
 	case 0x10:
-		log.Printf("STOP $%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("STOP $%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 
 	case 0x11:
-		log.Printf("LD DE,$%x\n", uint16(int(s.Mem[s.GetReg16Val("PC")+1])+(int(s.Mem[s.GetReg16Val("PC")+2])<<8)))
+		log.Printf("LD DE,$%x\n", uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1))+int(s.Mem.Read(s.GetReg16Val("PC")+2)<<8)))
 		s.LDR16N16("DE")
 
 	case 0x12:
@@ -96,7 +96,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DECR8("D")
 
 	case 0x16:
-		log.Printf("LD D,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD D,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDR8N8("D")
 
 	case 0x17:
@@ -104,7 +104,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RLA()
 
 	case 0x18:
-		log.Printf("JR $%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("JR $%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.JRN16()
 
 	case 0x19:
@@ -128,7 +128,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DECR8("E")
 
 	case 0x1E:
-		log.Printf("LD E,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD E,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDR8N8("E")
 
 	case 0x1F:
@@ -136,11 +136,11 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RRA()
 
 	case 0x20:
-		log.Printf("JR NZ,$%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("JR NZ,$%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.JRCCN16("NZ")
 
 	case 0x21:
-		log.Printf("LD HL,$%x\n", uint16(int(s.Mem[s.GetReg16Val("PC")+1])+(int(s.Mem[s.GetReg16Val("PC")+2])<<8)))
+		log.Printf("LD HL,$%x\n", uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1))+(int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8)))
 		s.LDR16N16("HL")
 
 	case 0x22:
@@ -160,7 +160,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DECR8("H")
 
 	case 0x26:
-		log.Printf("LD H,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD H,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDR8N8("H")
 
 	case 0x27:
@@ -168,7 +168,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DAA()
 
 	case 0x28:
-		log.Printf("JR Z,$%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("JR Z,$%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.JRCCN16("Z")
 
 	case 0x29:
@@ -192,7 +192,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DECR8("L")
 
 	case 0x2E:
-		log.Printf("LD L,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD L,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDR8N8("L")
 
 	case 0x2F:
@@ -200,11 +200,11 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.CPL()
 
 	case 0x30:
-		log.Printf("JR NC,$%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("JR NC,$%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.JRCCN16("NC")
 
 	case 0x31:
-		log.Printf("LD SP $%x\n", uint16(int(s.Mem[s.GetReg16Val("PC")+1])+(int(s.Mem[s.GetReg16Val("PC")+2])<<8)))
+		log.Printf("LD SP $%x\n", uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1))+(int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8)))
 		s.LDR16N16("SP")
 
 	case 0x32:
@@ -224,7 +224,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DECHL()
 
 	case 0x36:
-		log.Printf("LD (HL),$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD (HL),$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDHLN8()
 
 	case 0x37:
@@ -232,7 +232,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.SCF()
 
 	case 0x38:
-		log.Printf("JR C,$%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("JR C,$%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.JRCCN16("C")
 
 	case 0x39:
@@ -256,7 +256,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.DECR8("A")
 
 	case 0x3E:
-		log.Printf("LD A,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD A,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDR8N8("A")
 
 	case 0x3F:
@@ -784,17 +784,17 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.POPR16("BC")
 
 	case 0xC2:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		log.Printf("JP NZ,$%x \n", addr)
 		s.JPCCN16("NZ", addr)
 
 	case 0xC3:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		log.Printf("JP $%x \n", addr)
 		s.JPN16(addr)
 
 	case 0xC4:
-		addr := int(uint16(s.Mem[s.GetReg16Val("PC")+1]) + (uint16(s.Mem[s.GetReg16Val("PC")+2]) << 8))
+		addr := int(uint16(s.Mem.Read(s.GetReg16Val("PC")+1)) + (uint16(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8))
 		log.Printf("CALL NZ,$%x \n", addr)
 		s.CALLCCN16("NZ", addr)
 
@@ -803,7 +803,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.PUSHR16("BC")
 
 	case 0xC6:
-		log.Printf("ADD A,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("ADD A,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.ADDAN8()
 
 	case 0xC7:
@@ -819,7 +819,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RET()
 
 	case 0xCA:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		s.JPCCN16("Z", addr)
 		log.Printf("JP Z,$%x\n", addr)
 
@@ -827,17 +827,17 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.PrefixTable(log)
 
 	case 0xCC:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		log.Printf("CALL Z,$%x\n", addr)
 		s.CALLCCN16("Z", addr)
 
 	case 0xCD:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		log.Printf("CALL $%x\n", addr)
 		s.CALLN16(addr)
 
 	case 0xCE:
-		log.Printf("ADC A,$%x\n", int(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("ADC A,$%x\n", int(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.ADCAN8()
 
 	case 0xCF:
@@ -853,12 +853,12 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.POPR16("DE")
 
 	case 0xD2:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		log.Printf("JP NC,$%x \n", addr)
 		s.JPCCN16("NC", addr)
 
 	case 0xD4:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		log.Printf("CALL NC,$%x \n", addr)
 		s.CALLCCN16("NC", addr)
 
@@ -867,7 +867,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.PUSHR16("DE")
 
 	case 0xD6:
-		log.Printf("SUB A,$%x\n", int(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("SUB A,$%x\n", int(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.SUBAN8()
 
 	case 0xD7:
@@ -883,17 +883,17 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RETI()
 
 	case 0xDA:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		log.Printf("JP C,$%x\n", addr)
 		s.JPCCN16("C", addr)
 
 	case 0xDC:
-		addr := int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)
+		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
 		log.Printf("CALL C,$%x\n", addr)
 		s.CALLCCN16("C", addr)
 
 	case 0xDE:
-		log.Printf("SBC A,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("SBC A,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.SBCAN8()
 
 	case 0xDF:
@@ -901,7 +901,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RST("18H")
 
 	case 0xE0:
-		addr := int(uint16(0xFF00 + int(s.Mem[s.GetReg16Val("PC")+1])))
+		addr := int(uint16(0xFF00 + int(s.Mem.Read(s.GetReg16Val("PC")+1))))
 		log.Printf("LD $(%x),A\n", addr)
 		s.LDN16A(addr)
 		s.SetReg16Val("PC", s.GetReg16Val("PC")-1)
@@ -920,7 +920,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.PUSHR16("HL")
 
 	case 0xE6:
-		log.Printf("AND A,$%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("AND A,$%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.ANDAN8()
 
 	case 0xE7:
@@ -929,19 +929,19 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 
 	case 0xE8:
 		s.ADDSPE8()
-		log.Printf("ADD SP,%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("ADD SP,%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 
 	case 0xE9:
 		log.Printf("JP HL\n")
 		s.JPHL()
 
 	case 0xEA:
-		addr := int(uint16(int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)))
+		addr := int(uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)))
 		log.Printf("LD ($%x),A\n", addr)
 		s.LDN16A(addr)
 
 	case 0xEE:
-		log.Printf("XOR $%x\n", uint8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("XOR $%x\n", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.XORAN8()
 
 	case 0xEF:
@@ -949,7 +949,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RST("28H")
 
 	case 0xF0:
-		addr := int(uint16(0xFF00 + int(uint8(s.Mem[s.GetReg16Val("PC")+1]))))
+		addr := int(uint16(0xFF00 + int(uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))))
 		log.Printf("LD A,($%x)\n", addr)
 		s.LDAN16(addr)
 
@@ -973,7 +973,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.PUSHFA()
 
 	case 0xF6:
-		log.Printf("OR A,$%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("OR A,$%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.ORAN8()
 
 	case 0xF7:
@@ -981,7 +981,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.RST("30H")
 
 	case 0xF8:
-		log.Printf("LD HL,SP+%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("LD HL,SP+%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.LDHLSPE8()
 
 	case 0xF9:
@@ -989,7 +989,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.LDSPHL()
 
 	case 0xFA:
-		addr := int(uint16(int(s.Mem[s.GetReg16Val("PC")+1]) + int(s.Mem[s.GetReg16Val("PC")+2])<<8))
+		addr := int(uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1)) + int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8))
 		log.Printf("LD A,($%x)\n", addr)
 		s.LDAN16(addr)
 		s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
@@ -999,7 +999,7 @@ func (s *CPU) ExecuteOpcode(stateLog *log.Logger, log *log.Logger) {
 		s.EI()
 
 	case 0xFE:
-		log.Printf("CP $%x\n", int8(s.Mem[s.GetReg16Val("PC")+1]))
+		log.Printf("CP $%x\n", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
 		s.CPAN8()
 
 	case 0xFF:

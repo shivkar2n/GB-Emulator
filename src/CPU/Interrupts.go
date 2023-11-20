@@ -1,6 +1,6 @@
 package CPU
 
-import "log"
+// import "log"
 
 func (s *CPU) EI() {
 	s.IME = true
@@ -13,15 +13,15 @@ func (s *CPU) DI() {
 }
 
 func (s *CPU) GetIEBit(pos int) int { // Get interrupt enable
-	return (int(s.Mem[0xFFFF]) >> pos) & 1
+	return (int(s.Mem.Read(0xFFFF)) >> pos) & 1
 }
 
 func (s *CPU) GetIFBit(pos int) int { // Get interrupt flag
-	return (int(s.Mem[0xFF0F]) >> pos) & 1
+	return (int(s.Mem.Read(0xFF0F)) >> pos) & 1
 }
 
 func (s *CPU) SetIEBit(op int) { // Set interrupt enable bit
-	s.Mem[0xFFFF] = byte(s.Mem[0xFFFF] | 1<<op)
+	s.Mem.Write(int(s.Mem.Read(0xFFFF))|1<<op, 0xFFFF)
 }
 
 func (s *CPU) ResetIEBit(offset int) { // Reset interrupt enable bit
@@ -32,11 +32,11 @@ func (s *CPU) ResetIEBit(offset int) { // Reset interrupt enable bit
 			k += 1
 		}
 	}
-	s.Mem[0xFFFF] = byte(int(s.Mem[0xFFFF]) & k)
+	s.Mem.Write(int(s.Mem.Read(0xFFFF))&k, 0xFFFF)
 }
 
 func (s *CPU) SetIFBit(op int) { // Set interrupt flag bit
-	s.Mem[0xFF0F] = byte(int(s.Mem[0xFF0F]) | 1<<op)
+	s.Mem.Write(int(s.Mem.Read(0xFF0F))|1<<op, 0xFF0F)
 }
 
 func (s *CPU) ResetIFBit(offset int) { // Reset interrupt flag bit
@@ -47,14 +47,12 @@ func (s *CPU) ResetIFBit(offset int) { // Reset interrupt flag bit
 			k += 1
 		}
 	}
-	s.Mem[0xFF0F] = byte(int(s.Mem[0xFF0F]) & k)
+	s.Mem.Write(int(s.Mem.Read(0xFF0F))&k, 0xFF0F)
 }
 
-// func (s *CPU) InterruptHandler(stateLog *log.Logger, log *log.Logger) { // Interrupt handler
-func (s *CPU) InterruptHandler(stateLog *log.Logger) {
-	// log.Printf("IME:%t IF:%X IE:%X\n", s.IME, s.Mem[0xFF0F], s.Mem[0xFFFF])
+func (s *CPU) InterruptHandler() {
+	// log.Printf("IME:%t IF:%X IE:%X\n", s.IME, s.Mem.Read(0xFF0F), s.Mem.Read(0xFFFF))
 	if s.IME {
-
 		if s.GetIEBit(0) == 1 && s.GetIFBit(0) == 1 { // VBlank
 			s.IME = false
 			// log.Printf("V-Blank Interrupt!\t")

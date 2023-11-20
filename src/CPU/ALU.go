@@ -24,7 +24,7 @@ func (s *CPU) ADCAHL() { // reg[A] = reg[A] + C + M[reg[HL]]
 }
 
 func (s *CPU) ADCAN8() { // reg[A] = reg[A] + n8 + C
-	addr := int(s.Mem[s.GetReg16Val("PC")+1])
+	addr := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	val := int(int8(s.GetReg8Val("A") + addr + s.GetFlag("C")))
 	halfcarry := s.GetReg8Val("A")&0xF + addr&0xF + s.GetFlag("C")
 	carry := s.GetReg8Val("A")&0xFF + addr&0xFF + s.GetFlag("C")
@@ -57,7 +57,7 @@ func (s *CPU) ADDAHL() { // reg[A] = reg[A] + M[reg[HL]]
 }
 
 func (s *CPU) ADDAN8() { // reg[A] = reg[A] + n8
-	op := int(s.Mem[s.GetReg16Val("PC")+1])
+	op := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	val := int(int8(s.GetReg8Val("A") + op))
 	halfcarry := s.GetReg8Val("A")&0xF + op&0xF
 	carry := s.GetReg8Val("A")&0xFF + op&0xFF
@@ -85,7 +85,7 @@ func (s *CPU) ANDAHL() { // reg[A] = reg[A] & M[HL]
 }
 
 func (s *CPU) ANDAN8() { // reg[A] = reg[A] & n8
-	op := int(s.Mem[s.GetReg16Val("PC")+1])
+	op := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	val := s.GetReg8Val("A") & op
 	s.SetReg8Val("A", val)
 	s.SetFlagAND(val)
@@ -113,7 +113,7 @@ func (s *CPU) CPAHL() { // res = reg[A] - M[HL]
 }
 
 func (s *CPU) CPAN8() { // res = reg[A] - n8
-	op := int(s.Mem[s.GetReg16Val("PC")+1])
+	op := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	halfBorrow := s.GetReg8Val("A")&0x0F - op&0x0F
 	borrow := s.GetReg8Val("A")&0xFF - op&0xFF
 	val := int(int8(s.GetReg8Val("A") - op))
@@ -202,7 +202,7 @@ func (s *CPU) ORAHL() { // reg[A] = M[HL] | reg[A]
 }
 
 func (s *CPU) ORAN8() { // reg[A] = reg[A] | n8
-	op := int(s.Mem[s.GetReg16Val("PC")+1])
+	op := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	val := s.GetReg8Val("A") | op
 	s.SetReg8Val("A", val)
 	s.SetFlagOR(val)
@@ -232,7 +232,7 @@ func (s *CPU) SUBAHL() { // reg[A] = reg[A] - M[HL]
 }
 
 func (s *CPU) SUBAN8() { // reg[A] = reg[A] - n8
-	addr := int(s.Mem[s.GetReg16Val("PC")+1])
+	addr := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	val := s.GetReg8Val("A") - addr
 	halfborrow := s.GetReg8Val("A")&0xF - addr&0xF
 	borrow := s.GetReg8Val("A") - addr
@@ -264,7 +264,7 @@ func (s *CPU) SBCAHL() { // reg[A] = reg[A] - M[HL] - C
 }
 
 func (s *CPU) SBCAN8() { // reg[A] = reg[A] - n8 - C
-	op := int(int8(s.Mem[s.GetReg16Val("PC")+1]))
+	op := int(int8(s.Mem.Read(s.GetReg16Val("PC") + 1)))
 	val := int(int8(s.GetReg8Val("A") - op - s.GetFlag("C")))
 	halfborrow := s.GetReg8Val("A")&0xF - op&0xF - s.GetFlag("C")
 	borrow := s.GetReg8Val("A")&0xFF - op&0xFF - s.GetFlag("C")
@@ -291,7 +291,7 @@ func (s *CPU) XORAHL() { // reg[A] = reg[A] ^ M[HL]
 }
 
 func (s *CPU) XORAN8() { // reg[A] = reg[A] ^ op
-	op := int(s.Mem[s.GetReg16Val("PC")+1])
+	op := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	val := s.GetReg8Val("A") ^ op
 	s.SetReg8Val("A", val)
 	s.SetFlagOR(val)

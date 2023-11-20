@@ -3,12 +3,13 @@ package CPU
 import (
 	"fmt"
 	"log"
-	"os"
+
+	"github.com/shivkar2n/GB-Emulator/MMU"
 )
 
 type CPU struct {
 	FA, CB, ED, LH, PC, SP [2]byte
-	Mem                    [65536]byte
+	Mem                    MMU.MMU
 	T, M, Sysclk, TIMA     int
 	TotalT, TotalM         int
 	IME                    bool
@@ -16,7 +17,7 @@ type CPU struct {
 	ClkRate, FrameRate     int
 }
 
-func InitCPU() *CPU {
+func Init(m MMU.MMU) *CPU {
 	c := CPU{
 		FA:        [2]byte{byte(0xB0), byte(0x01)},
 		CB:        [2]byte{byte(0x13), byte(0x00)},
@@ -24,7 +25,7 @@ func InitCPU() *CPU {
 		SP:        [2]byte{byte(0xFE), byte(0xFF)},
 		PC:        [2]byte{byte(0x00), byte(0x01)},
 		ED:        [2]byte{byte(0xD8), byte(0x00)},
-		Mem:       [65536]byte{},
+		Mem:       m,
 		IME:       false,
 		StopExec:  false,
 		T:         0,
@@ -36,8 +37,8 @@ func InitCPU() *CPU {
 		ClkRate:   4194304,
 		FrameRate: 60,
 	}
-	c.Mem[0xFF44] = byte(0x90)
-	c.Mem[0xFF0F] = byte(0xE0)
+	c.Mem.Write(0x90, 0xFF44)
+	c.Mem.Write(0xE0, 0xFF0F)
 	return &c
 }
 
@@ -89,30 +90,30 @@ func (s *CPU) StateInfo(log *log.Logger) { // Get info about state of CPU
 	l := s.GetReg8Val("L")
 	sp := s.GetReg16Val("SP")
 	pc := s.GetReg16Val("PC")
-	pcMem := s.Mem[s.GetReg16Val("PC")]
-	pcMem1 := s.Mem[s.GetReg16Val("PC")+1]
-	pcMem2 := s.Mem[s.GetReg16Val("PC")+2]
-	pcMem3 := s.Mem[s.GetReg16Val("PC")+3]
-	div := s.Mem[0xFF04]
-	tima := s.Mem[0xFF05]
-	tma := s.Mem[0xFF06]
-	tac := s.Mem[0xFF07]
-	var ime int
-	if s.IME {
-		ime = 0
-	} else {
-		ime = 0
-	}
-	ie := s.Mem[0xFFFF]
-	ifl := s.Mem[0xFF0F]
+	pcMem := s.Mem.Read(s.GetReg16Val("PC"))
+	pcMem1 := s.Mem.Read(s.GetReg16Val("PC") + 1)
+	pcMem2 := s.Mem.Read(s.GetReg16Val("PC") + 2)
+	pcMem3 := s.Mem.Read(s.GetReg16Val("PC") + 3)
+	// div := s.Mem[0xFF04]
+	// tima := s.Mem[0xFF05]
+	// tma := s.Mem[0xFF06]
+	// tac := s.Mem[0xFF07]
+	// var ime int
+	// if s.IME {
+	// 	ime = 0
+	// } else {
+	// 	ime = 0
+	// }
+	// ie := s.Mem[0xFFFF]
+	// ifl := s.Mem[0xFF0F]
 
-	// log.Printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
-	log.Printf("TIMA: %02X TMA: %02X DIV: %02X TAC: %02X IME: %02X IE: %02X IF: %02X A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", div, tima, tma, tac, ime, ie, ifl, a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
+	log.Printf("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
+	// log.Printf("TIMA: %02X TMA: %02X DIV: %02X TAC: %02X IME: %02X IE: %02X IF: %02X A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", div, tima, tma, tac, ime, ie, ifl, a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
 }
 
-func (s *CPU) TimerInfo(log *log.Logger) { // Get info about state of CPU
-	log.Printf("Total-M:%d Total-T:%d DIV:%x TIMA:%x TMA:%x TAC:%x\n", s.TotalM, s.TotalT, s.Mem[0xFF04], s.Mem[0xFF05], s.Mem[0xFF06], s.Mem[0xFF07])
-}
+// func (s *CPU) TimerInfo(log *log.Logger) { // Get info about state of CPU
+// 	log.Printf("Total-M:%d Total-T:%d DIV:%x TIMA:%x TMA:%x TAC:%x\n", s.TotalM, s.TotalT, s.Mem[0xFF04], s.Mem[0xFF05], s.Mem[0xFF06], s.Mem[0xFF07])
+// }
 
 func (s *CPU) GetReg8Val(name string) int { // Get value of 8-bit register
 	if name == "A" {
@@ -157,22 +158,22 @@ func (s *CPU) SetReg8Val(name string, val int) { // Set value of 8-bit register
 
 func (s *CPU) GetHLVal() int { // Get value pointed by HL register
 	addr := 256*int(s.LH[1]) + int(s.LH[0])
-	return int(s.Mem[addr])
+	return int(s.Mem.Read(addr))
 }
 
 func (s *CPU) SetHLVal(val int) { // Set value pointed by HL register
 	addr := 256*int(s.LH[1]) + int(s.LH[0])
-	s.Mem[addr] = byte(val)
+	s.Mem.Write(val, addr)
 }
 
 func (s *CPU) GetPCVal() int { // Get value pointed by PC register
 	addr := 256*int(s.PC[1]) + int(s.PC[0])
-	return int(s.Mem[addr])
+	return int(s.Mem.Read(addr))
 }
 
 func (s *CPU) SetPCVal(val int) { // Set value pointed by PC register
 	addr := 256*int(s.PC[1]) + int(s.PC[0])
-	s.Mem[addr] = byte(val)
+	s.Mem.Write(val, addr)
 }
 
 func (s *CPU) GetReg16Val(name string) int { // Get value of 16-bit register
@@ -233,15 +234,9 @@ func (s *CPU) SetClockTime(t int, m int) {
 	s.M = m
 }
 
-func (s *CPU) LoadROM() { // Load ROM into memory
-	fileName := os.Args[1]
-	rom, _ := os.ReadFile(fileName)
-	copy(s.Mem[:], rom)
-}
-
 func (s *CPU) LogSerialIO() {
-	if s.Mem[0xFF02] == 0x81 {
-		fmt.Printf("%c", s.Mem[0xFF01])
-		s.Mem[0xFF02] = 0x00
+	if s.Mem.Read(0xFF02) == 0x81 {
+		fmt.Printf("%c", s.Mem.Read(0xFF01))
+		s.Mem.Write(0x00, 0xFF02)
 	}
 }

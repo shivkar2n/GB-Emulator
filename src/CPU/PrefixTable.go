@@ -5,7 +5,7 @@ import (
 )
 
 func (s *CPU) PrefixTable(log *log.Logger) {
-	opCode := uint8(s.Mem[s.GetReg16Val("PC")+1])
+	opCode := uint8(s.Mem.Read(s.GetReg16Val("PC") + 1))
 
 	switch opCode {
 	case 0x00:

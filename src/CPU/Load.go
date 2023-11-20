@@ -8,7 +8,7 @@ package CPU
 
 func (s *CPU) ResetDIV(op int) {
 	if op == 0xFF04 {
-		s.Mem[op] = 0x00
+		s.Mem.Write(0x00, op)
 	}
 }
 
@@ -19,14 +19,14 @@ func (s *CPU) LDR8R8(reg1 string, reg2 string) { // reg[reg1] = reg[reg2]
 }
 
 func (s *CPU) LDR8N8(reg string) { // reg[] = n8
-	addr := int(s.Mem[s.GetReg16Val("PC")+1])
+	addr := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	s.SetReg8Val(reg, addr)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
 	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) LDR16N16(reg string) { // reg16[reg] = n16
-	addr := int(uint16(int(s.Mem[s.GetReg16Val("PC")+1]) + (int(s.Mem[s.GetReg16Val("PC")+2]) << 8)))
+	addr := int(uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)))
 	s.SetReg16Val(reg, addr)
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+3)
 	s.SetClockTime(12, 3)
@@ -40,7 +40,7 @@ func (s *CPU) LDHLR8(reg string) { // M[HL] = reg[]
 }
 
 func (s *CPU) LDHLN8() { // M[HL] = n8
-	op := int(s.Mem[s.GetReg16Val("PC")+1])
+	op := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	s.SetHLVal(op)
 	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
@@ -54,27 +54,27 @@ func (s *CPU) LDR8HL(reg string) { // reg[] = M[HL]
 }
 
 func (s *CPU) LDR16A(reg string) { // M[reg] = reg[A]
-	s.Mem[s.GetReg16Val(reg)] = byte(s.GetReg8Val("A"))
+	s.Mem.Write(s.GetReg8Val("A"), s.GetReg16Val(reg))
 	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) LDN16A(op int) { // M[n16] = reg[A]
-	s.Mem[op] = byte(s.GetReg8Val("A"))
+	s.Mem.Write(s.GetReg8Val("A"), op)
 	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+3)
 	s.SetClockTime(16, 4)
 }
 
 func (s *CPU) LDAR16(reg string) { // reg[A] = M[reg[]]
-	s.SetReg8Val("A", int(s.Mem[s.GetReg16Val(reg)]))
+	s.SetReg8Val("A", int(s.Mem.Read(s.GetReg16Val(reg))))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) LDAN16(op int) { // reg[A] = M[n16]
-	s.SetReg8Val("A", int(s.Mem[op]))
+	s.SetReg8Val("A", int(s.Mem.Read(op)))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
 	s.SetClockTime(16, 4)
 }
