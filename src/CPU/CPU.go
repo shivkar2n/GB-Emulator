@@ -8,13 +8,13 @@ import (
 )
 
 type CPU struct {
-	FA, CB, ED, LH, PC, SP [2]byte
-	Mem                    MMU.MMU
-	T, M, Sysclk, TIMA     int
-	TotalT, TotalM         int
-	IME                    bool
-	StopExec               bool
-	ClkRate, FrameRate     int
+	FA, CB, ED, LH, PC, SP  [2]byte
+	Mem                     MMU.MMU
+	T, M, Sysclk, TIMA, DIV int
+	TotalT, TotalM          int
+	IME                     bool
+	StopExec                bool
+	ClkRate, FrameRate      int
 }
 
 func Init(m MMU.MMU) *CPU {
@@ -31,14 +31,13 @@ func Init(m MMU.MMU) *CPU {
 		T:         0,
 		M:         0,
 		TIMA:      0,
+		DIV:       0xABCC,
 		TotalT:    0,
 		TotalM:    0,
 		Sysclk:    0,
 		ClkRate:   4194304,
 		FrameRate: 60,
 	}
-	c.Mem.Write(0x90, 0xFF44)
-	c.Mem.Write(0xE0, 0xFF0F)
 	return &c
 }
 
@@ -94,21 +93,8 @@ func (s *CPU) StateInfo(log *log.Logger) { // Get info about state of CPU
 	pcMem1 := s.Mem.Read(s.GetReg16Val("PC") + 1)
 	pcMem2 := s.Mem.Read(s.GetReg16Val("PC") + 2)
 	pcMem3 := s.Mem.Read(s.GetReg16Val("PC") + 3)
-	// div := s.Mem[0xFF04]
-	// tima := s.Mem[0xFF05]
-	// tma := s.Mem[0xFF06]
-	// tac := s.Mem[0xFF07]
-	// var ime int
-	// if s.IME {
-	// 	ime = 0
-	// } else {
-	// 	ime = 0
-	// }
-	// ie := s.Mem[0xFFFF]
-	// ifl := s.Mem[0xFF0F]
 
-	log.Printf("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
-	// log.Printf("TIMA: %02X TMA: %02X DIV: %02X TAC: %02X IME: %02X IE: %02X IF: %02X A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", div, tima, tma, tac, ime, ie, ifl, a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
+	log.Printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
 }
 
 // func (s *CPU) TimerInfo(log *log.Logger) { // Get info about state of CPU
