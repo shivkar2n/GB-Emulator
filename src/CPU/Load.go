@@ -6,12 +6,6 @@
 
 package CPU
 
-func (s *CPU) ResetDIV(op int) {
-	if op == 0xFF04 {
-		s.Mem.Write(0x00, op)
-	}
-}
-
 func (s *CPU) LDR8R8(reg1 string, reg2 string) { // reg[reg1] = reg[reg2]
 	s.SetReg8Val(reg1, s.GetReg8Val(reg2))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
@@ -34,7 +28,6 @@ func (s *CPU) LDR16N16(reg string) { // reg16[reg] = n16
 
 func (s *CPU) LDHLR8(reg string) { // M[HL] = reg[]
 	s.SetHLVal(s.GetReg8Val(reg))
-	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 	s.SetClockTime(8, 2)
 }
@@ -42,7 +35,6 @@ func (s *CPU) LDHLR8(reg string) { // M[HL] = reg[]
 func (s *CPU) LDHLN8() { // M[HL] = n8
 	op := int(s.Mem.Read(s.GetReg16Val("PC") + 1))
 	s.SetHLVal(op)
-	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
 	s.SetClockTime(12, 3)
 }
@@ -55,14 +47,12 @@ func (s *CPU) LDR8HL(reg string) { // reg[] = M[HL]
 
 func (s *CPU) LDR16A(reg string) { // M[reg] = reg[A]
 	s.Mem.Write(s.GetReg8Val("A"), s.GetReg16Val(reg))
-	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 	s.SetClockTime(8, 2)
 }
 
 func (s *CPU) LDN16A(op int) { // M[n16] = reg[A]
 	s.Mem.Write(s.GetReg8Val("A"), op)
-	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+3)
 	s.SetClockTime(16, 4)
 }
@@ -81,7 +71,6 @@ func (s *CPU) LDAN16(op int) { // reg[A] = M[n16]
 
 func (s *CPU) LDHLIA() { // M[HL] = reg[A], HL++
 	s.SetHLVal(s.GetReg8Val("A"))
-	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("HL", int(uint16(s.GetReg16Val("HL")+1)))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 	s.SetClockTime(8, 2)
@@ -89,7 +78,6 @@ func (s *CPU) LDHLIA() { // M[HL] = reg[A], HL++
 
 func (s *CPU) LDHLDA() { // M[HL] = reg[A], HL--
 	s.SetHLVal(s.GetReg8Val("A"))
-	s.ResetDIV(s.GetReg16Val("HL"))
 	s.SetReg16Val("HL", int(uint16(s.GetReg16Val("HL")-1)))
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 	s.SetClockTime(8, 2)

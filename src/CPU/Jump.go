@@ -20,7 +20,7 @@ func (s *CPU) JPHL() { // reg[PC] = reg[HL]
 }
 
 func (s *CPU) JRN16() { // reg[PC] = reg[PC] + n16
-	addr := int(int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
+	addr := int(int8(s.Mem.Read(s.GetReg16Val("PC") + 1)))
 	s.JPN16(s.GetReg16Val("PC") + addr + 2)
 	s.SetClockTime(12, 3)
 }
@@ -96,4 +96,5 @@ func (s *CPU) RST(vec string) {
 	}
 	s.PUSHN16(s.GetReg16Val("PC") + 1)
 	s.JPN16(vecAddr)
+	s.SetClockTime(16, 4)
 }

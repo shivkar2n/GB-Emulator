@@ -32,7 +32,6 @@ func Init() *Display {
 
 	window, _ := sdl.CreateWindow("GB-Emulator", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, sdl.WINDOW_RESIZABLE)
 	renderer, _ := sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
-
 	var pixels [NO_PIXEL_HEIGHT][NO_PIXEL_WIDTH]*sdl.Rect
 
 	for i := 0; i < NO_PIXEL_WIDTH; i++ {
@@ -51,9 +50,15 @@ func Init() *Display {
 func (d *Display) RenderFrame(c *CPU.CPU) {
 	d.renderer.Clear()
 
-	for ly := 0; ly < NO_PIXEL_HEIGHT; ly++ {
+	for ly := 0; ly < NO_PIXEL_HEIGHT; {
 
-		// Load object buffer (OAM Scan)
+		// STAT interrupt if ly==lyc
+		if (c.Mem.Read(0xFF41)>>6)&1 == 1 && int(c.Mem.Read(0xFF45)) == ly {
+			c.SetIFBit(1)
+			c.InterruptHandler()
+		}
+
+		// Load object buffer (OAM Scan - Mode 2)
 		objBuffer := [][4]int{}
 		for obj := 0xFE00; obj < 0xFEA0; obj += 4 {
 			spriteX := int(c.Mem.Read(obj + 1))
@@ -66,23 +71,24 @@ func (d *Display) RenderFrame(c *CPU.CPU) {
 			}
 		}
 
-		objFIFO := []int{}
 		bgFIFO := []int{}
 		fetcherX := 0
 		fetcherY := 0
+		tileAddr := 0
+		tileIndex := 0
 
-		// Draw on a scanline
-		i := 0
-		for posX := 0; posX < NO_PIXEL_WIDTH; i++ {
+		scX := int(c.Mem.Read(0xFF43))
+		scY := int(c.Mem.Read(0xFF42))
+
+		// Draw on a scanline (Drawing - Mode 3)
+		ixpc := 0
+		posX := 0
+		for x := 0; x < NO_PIXEL_WIDTH; {
 
 			// BG Tile Fetcher
-			scX := int(c.Mem.Read(0xFF43))
-			scY := int(c.Mem.Read(0xFF42))
-			println(scX, scY)
-			fetcherX = (scX/8 + i) & 0x1F
+			fetcherX = (scX/8 + ixpc) & 0x1F
 			fetcherY = (ly + scY) & 0xFF
 
-			var tileAddr, tileIndex int
 			if (c.Mem.Read(0xFF40)>>3)&1 == 1 {
 				tileIndex = int(c.Mem.Read(0x9C00 + NO_TILES_ROW*(fetcherY>>3) + fetcherX))
 			} else {
@@ -95,67 +101,33 @@ func (d *Display) RenderFrame(c *CPU.CPU) {
 				tileAddr = 0x9000 + 16*int(int8(tileIndex)) + 2*((ly+scY)%8)
 			}
 
-			for i := scX % 8; len(bgFIFO) < 8; i++ {
-				bgFIFO = append(bgFIFO, int(2*((c.Mem.Read(tileAddr+1)>>(7-i))&1)+((c.Mem.Read(tileAddr)>>(7-i))&1)))
-			}
-
-			bgToObj := 0
-			// xFlip := 0
-			yFlip := 0
-
-			// // Fetch OBJ pixel
-			if len(objBuffer) != 0 {
-				tileAddr := 0x8000 + 16*int(uint8(objBuffer[0][2])) + 2*(fetcherY%8)
-				bgToObj = int((objBuffer[0][3] >> 7) & 1)
-				yFlip = int((objBuffer[0][3] >> 6) & 1)
-				objBuffer = objBuffer[1:]
-
-				// 	// Load pixel into OBJ FIFO
-				if yFlip == 0 {
-					for i := 0; len(objFIFO) < 8; i++ {
-						objFIFO = append(objFIFO, int(2*((c.Mem.Read(tileAddr+1)>>(7-i))&1)+((c.Mem.Read(tileAddr)>>(7-i))&1)))
-					}
+			for i := scX; i < 8 && len(bgFIFO) < 8; i++ {
+				// Disable background
+				if (c.Mem.Read(0xFF40))&1 == 0 {
+					bgFIFO = append(bgFIFO, 0)
 				} else {
-					for i := 0; len(objFIFO) < 8; i++ {
-						objFIFO = append(objFIFO, int(2*((c.Mem.Read(tileAddr+1)>>i)&1)+((c.Mem.Read(tileAddr)>>i)&1)))
-					}
+					bgFIFO = append(bgFIFO, int(2*((c.Mem.Read(tileAddr+1)>>(7-i))&1)+((c.Mem.Read(tileAddr)>>(7-i))&1)))
 				}
+				posX++
 			}
 
 			// Load pixel into LCD
+			if len(bgFIFO) != 0 {
+				ixpc++
+			}
 			for len(bgFIFO) != 0 {
-
 				colorBG := palette[bgFIFO[0]]
-				colorOBJ := [4]uint8{}
 				bgFIFO = bgFIFO[1:]
+				d.renderer.SetDrawColor(colorBG[0], colorBG[1], colorBG[2], colorBG[3])
 
-				// Disable background
-				if (c.Mem.Read(0xFF40))&1 == 0 {
-					colorBG = palette[0]
-				}
-
-				if len(objFIFO) != 0 {
-					colorOBJ = palette[objFIFO[0]]
-					objFIFO = objFIFO[1:]
-				}
-
-				if len(objFIFO) != 0 {
-					if objFIFO[0] == 0 || (bgFIFO[0] != 0 && bgToObj == 1) {
-						d.renderer.SetDrawColor(colorBG[0], colorBG[1], colorBG[2], colorBG[3])
-					} else {
-						d.renderer.SetDrawColor(colorOBJ[0], colorOBJ[1], colorOBJ[2], colorOBJ[3])
-					}
-				} else {
-					d.renderer.SetDrawColor(colorBG[0], colorBG[1], colorBG[2], colorBG[3])
-				}
-
-				d.renderer.DrawRect(d.pixels[ly][posX])
-				d.renderer.FillRect(d.pixels[ly][posX])
-				posX++
+				d.renderer.DrawRect(d.pixels[ly][x])
+				d.renderer.FillRect(d.pixels[ly][x])
+				x++
 			}
 		}
+		ly++
+		c.Mem.Write(ly, 0xFF44)
 	}
-
 	sdl.Delay(0)
 	d.renderer.Present()
 }

@@ -3,14 +3,10 @@ package main
 import (
 	"github.com/shivkar2n/GB-Emulator/CPU"
 	"github.com/shivkar2n/GB-Emulator/Display"
-	"github.com/shivkar2n/GB-Emulator/Logger"
 	"github.com/shivkar2n/GB-Emulator/MMU"
 )
 
 func main() {
-	log := Logger.DebugLogger()
-	stateLog := Logger.StateLogger()
-
 	d := Display.Init()
 	m := MMU.Init()
 	c := CPU.Init(m)
@@ -21,17 +17,30 @@ func main() {
 	// exec = false
 
 	for 1 == 1 {
-		for c.TotalM < c.ClkRate/c.FrameRate {
+		if !c.StopExec {
+			for c.TotalT < c.ClkRate/c.FrameRate {
+				// c.StateInfo()
+				c.ExecuteOpcode()
+				c.IncrTimer()
+				if c.StopExec {
+					break
+				}
+				c.LogSerialIO()
+				c.InterruptHandler()
+				c.IncrTimer()
+			}
+			c.TotalT = c.TotalT % (c.ClkRate / c.FrameRate)
 
-			c.ExecuteOpcode(stateLog, log)
-			c.IncrTimer()
+		} else {
+			// c.StateInfo()
 			c.LogSerialIO()
-			c.T = 0
-			c.M = 0
+			c.T = 4
+			c.IncrTimer()
 			c.InterruptHandler()
+			c.IncrTimer()
+
 		}
 		d.RenderFrame(c)
-		c.TotalM = c.TotalM % (c.ClkRate / c.FrameRate)
 	}
 
 }

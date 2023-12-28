@@ -1,1 +1,0 @@
-CPU State and debug logs are stored here

@@ -1,10 +1,23 @@
 package CPU
 
+func (s *CPU) EI() {
+	s.IME = true
+	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
+}
+
+func (s *CPU) DI() {
+	s.IME = false
+	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
+}
+
 func (s *CPU) CPL() { // Reg[A] = ~Reg[A]
 	s.SetReg8Val("A", ^s.GetReg8Val("A"))
 	s.SetFlag("N")
 	s.SetFlag("H")
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) SCF() { // Flag[C] = true
@@ -12,6 +25,7 @@ func (s *CPU) SCF() { // Flag[C] = true
 	s.ResetFlag("H")
 	s.SetFlag("C")
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) CCF() { // Flag[C] = ~Flag[C]
@@ -23,6 +37,7 @@ func (s *CPU) CCF() { // Flag[C] = ~Flag[C]
 	s.ResetFlag("N")
 	s.ResetFlag("H")
 	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+	s.SetClockTime(4, 1)
 }
 
 func (s *CPU) NOP() {
@@ -32,5 +47,6 @@ func (s *CPU) NOP() {
 
 func (s *CPU) HALT() {
 	s.StopExec = true
+	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
 	s.SetClockTime(4, 1)
 }
