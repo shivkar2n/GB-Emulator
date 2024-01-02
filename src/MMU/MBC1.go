@@ -1,7 +1,7 @@
 package MMU
 
-func (m *MMU) Read(addr int) byte {
-	return m.Ram[addr]
+func (m *MMU) Read(addr int) int {
+	return int(m.Ram[addr])
 }
 
 func (m *MMU) Write(val int, addr int) {

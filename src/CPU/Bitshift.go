@@ -1,163 +1,165 @@
 package CPU
 
-func (s *CPU) RLR8(reg string) { // Rotate bits reg[] left through Flag C
-	carry := s.GetReg8Val(reg) >> 7
-	val := int(int8(s.GetReg8Val(reg)<<1) | int8(s.GetFlag("C")))
-	s.SetReg8Val(reg, val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(8, 2)
+import "fmt"
+
+func (cpu *CPU) RLR8(reg string) (string, int, int, bool) { // Rotate bits reg[] left through Flag C
+	opcode := fmt.Sprintf("RL %s", reg)
+	carry := cpu.Reg.Read(reg) >> 7
+	val := int(int8(cpu.Reg.Read(reg)<<1) | int8(cpu.GetFlag("C")))
+	cpu.Reg.Write(val, reg)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 8, true
 }
 
-func (s *CPU) RLHL() { // Rotate bits M[reg[HL]] left through Flag C
-	carry := s.GetHLVal() >> 7
-	val := int(int8((s.GetHLVal() << 1) | s.GetFlag("C")))
-	s.SetHLVal(val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(16, 4)
+func (cpu *CPU) RLHL() (string, int, int, bool) { // Rotate bits M[reg[HL]] left through Flag C
+	opcode := fmt.Sprintf("RL (HL)")
+	carry := cpu.GetHLVal() >> 7
+	val := int(int8((cpu.GetHLVal() << 1) | cpu.GetFlag("C")))
+	cpu.SetHLVal(val)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 16, true
 }
 
-func (s *CPU) RLA() { // Rotate bits reg[A] left through Flag C
-	carry := s.GetReg8Val("A") >> 7
-	val := int(int8((s.GetReg8Val("A") << 1) | s.GetFlag("C")))
-	s.SetReg8Val("A", val)
-	s.SetFlagRL(1, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) RLA() (string, int, int, bool) { // Rotate bits reg[A] left through Flag C
+	opcode := fmt.Sprintf("RLA")
+	carry := cpu.Reg.Read("A") >> 7
+	val := int(int8((cpu.Reg.Read("A") << 1) | cpu.GetFlag("C")))
+	cpu.Reg.Write(val, "A")
+	cpu.SetFlagRL(1, carry)
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) RLCR8(reg string) { // Rotate bits reg[A] left through Flag c
-	carry := s.GetReg8Val(reg) >> 7
-	val := int(int8((s.GetReg8Val(reg) << 1) | carry))
-	s.SetReg8Val(reg, val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(8, 2)
+func (cpu *CPU) RLCR8(reg string) (string, int, int, bool) { // Rotate bits reg[A] left through Flag c
+	opcode := fmt.Sprintf("RLC %s", reg)
+	carry := cpu.Reg.Read(reg) >> 7
+	val := int(int8((cpu.Reg.Read(reg) << 1) | carry))
+	cpu.Reg.Write(val, reg)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 8, true
 }
 
-func (s *CPU) RLCHL() { // Rotate bits M[reg[HL]] left through flag C
-	carry := s.GetHLVal() >> 7
-	val := int(int8((s.GetHLVal() << 1) | carry))
-	s.SetHLVal(val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(16, 4)
+func (cpu *CPU) RLCHL() (string, int, int, bool) { // Rotate bits M[reg[HL]] left through flag C
+	opcode := fmt.Sprintf("RLC (HL)")
+	carry := cpu.GetHLVal() >> 7
+	val := int(int8((cpu.GetHLVal() << 1) | carry))
+	cpu.SetHLVal(val)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 16, true
 }
 
-func (s *CPU) RLCA() { // Rotate bits reg[A] left
-	carry := s.GetReg8Val("A") >> 7
-	val := int(int8((s.GetReg8Val("A") << 1) | carry))
-	s.SetReg8Val("A", val)
-	s.SetFlagRL(1, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) RLCA() (string, int, int, bool) { // Rotate bits reg[A] left
+	opcode := fmt.Sprintf("RLCA")
+	carry := cpu.Reg.Read("A") >> 7
+	val := int(int8((cpu.Reg.Read("A") << 1) | carry))
+	cpu.Reg.Write(val, "A")
+	cpu.SetFlagRL(1, carry)
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) RRR8(reg string) { // Rotate bits reg[] right through flag C
-	carry := s.GetReg8Val(reg) & 0x01
-	val := int(int8((s.GetReg8Val(reg) >> 1) | (s.GetFlag("C") << 7)))
-	s.SetReg8Val(reg, val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(8, 2)
+func (cpu *CPU) RRR8(reg string) (string, int, int, bool) { // Rotate bits reg[] right through flag C
+	opcode := fmt.Sprintf("RR %s", reg)
+	carry := cpu.Reg.Read(reg) & 0x01
+	val := int(int8((cpu.Reg.Read(reg) >> 1) | (cpu.GetFlag("C") << 7)))
+	cpu.Reg.Write(val, reg)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 8, true
 }
 
-func (s *CPU) RRHL() { // Rotate bits M[reg[HL]] right through flag C
-	carry := s.GetHLVal() & 0x01
-	val := int(int8((s.GetHLVal() >> 1) | (s.GetFlag("C") << 7)))
-	s.SetHLVal(val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(16, 4)
+func (cpu *CPU) RRHL() (string, int, int, bool) { // Rotate bits M[reg[HL]] right through flag C
+	opcode := fmt.Sprintf("RR (HL)")
+	carry := cpu.GetHLVal() & 0x01
+	val := int(int8((cpu.GetHLVal() >> 1) | (cpu.GetFlag("C") << 7)))
+	cpu.SetHLVal(val)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 16, true
 }
 
-func (s *CPU) RRA() { // Rotate bits reg[A] right through flag C
-	carry := s.GetReg8Val("A") & 0x01
-	val := (s.GetReg8Val("A") >> 1) | (s.GetFlag("C") << 7)
-	s.SetReg8Val("A", val)
-	s.SetFlagRL(1, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) RRA() (string, int, int, bool) { // Rotate bits reg[A] right through flag C
+	opcode := fmt.Sprintf("RRA")
+	carry := cpu.Reg.Read("A") & 0x01
+	val := (cpu.Reg.Read("A") >> 1) | (cpu.GetFlag("C") << 7)
+	cpu.Reg.Write(val, "A")
+	cpu.SetFlagRL(1, carry)
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) RRCR8(reg string) { // Rotate reg[] right
-	carry := s.GetReg8Val(reg) & 0x01
-	val := (s.GetReg8Val(reg) >> 1) | (carry << 7)
-	s.SetReg8Val(reg, val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(8, 2)
+func (cpu *CPU) RRCR8(reg string) (string, int, int, bool) { // Rotate reg[] right
+	opcode := fmt.Sprintf("RRC %s", reg)
+	carry := cpu.Reg.Read(reg) & 0x01
+	val := (cpu.Reg.Read(reg) >> 1) | (carry << 7)
+	cpu.Reg.Write(val, reg)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 8, true
 }
 
-func (s *CPU) RRCHL() { // Rotate M[reg[HL]] right
-	carry := s.GetHLVal() & 0x01
-	val := (s.GetHLVal() >> 1) | (carry << 7)
-	s.SetHLVal(val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(16, 4)
+func (cpu *CPU) RRCHL() (string, int, int, bool) { // Rotate M[reg[HL]] right
+	opcode := fmt.Sprintf("RRC (HL)")
+	carry := cpu.GetHLVal() & 0x01
+	val := (cpu.GetHLVal() >> 1) | (carry << 7)
+	cpu.SetHLVal(val)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 16, true
 }
 
-func (s *CPU) RRCA() { // Rotate reg[A] right
-	carry := s.GetReg8Val("A") & 0x01
-	val := (s.GetReg8Val("A") >> 1) | (carry << 7)
-	s.SetReg8Val("A", val)
-	s.SetFlagRL(1, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) RRCA() (string, int, int, bool) { // Rotate reg[A] right
+	opcode := fmt.Sprintf("RRCA ")
+	carry := cpu.Reg.Read("A") & 0x01
+	val := (cpu.Reg.Read("A") >> 1) | (carry << 7)
+	cpu.Reg.Write(val, "A")
+	cpu.SetFlagRL(1, carry)
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) SLAR8(reg string) { // reg[] = reg[] << 1
-	carry := s.GetReg8Val(reg) >> 7
-	val := int(int8(s.GetReg8Val(reg) << 1))
-	s.SetReg8Val(reg, val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(8, 2)
+func (cpu *CPU) SLAR8(reg string) (string, int, int, bool) { // reg[] = reg[] << 1
+	opcode := fmt.Sprintf("SLA B")
+	carry := cpu.Reg.Read(reg) >> 7
+	val := int(int8(cpu.Reg.Read(reg) << 1))
+	cpu.Reg.Write(val, reg)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 8, true
 }
 
-func (s *CPU) SLAHL() { // M[reg[HL]] = M[reg[HL]] << 1
-	carry := s.GetHLVal() >> 7
-	val := int(int8(s.GetHLVal() << 1))
-	s.SetHLVal(val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(16, 4)
+func (cpu *CPU) SLAHL() (string, int, int, bool) { // M[reg[HL]] = M[reg[HL]] << 1
+	opcode := fmt.Sprintf("SLA (HL)")
+	carry := cpu.GetHLVal() >> 7
+	val := int(int8(cpu.GetHLVal() << 1))
+	cpu.SetHLVal(val)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 16, true
 }
 
-func (s *CPU) SRAR8(reg string) { // reg[] = reg[] >> 1, bit 7 unchanged
-	carry := s.GetReg8Val(reg) & 0x01
-	val := (s.GetReg8Val(reg) >> 1) | s.GetReg8Val(reg)&0x80
-	s.SetReg8Val(reg, val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(8, 2)
+func (cpu *CPU) SRAR8(reg string) (string, int, int, bool) { // reg[] = reg[] >> 1, bit 7 unchanged
+	opcode := fmt.Sprintf("SRA %s", reg)
+	carry := cpu.Reg.Read(reg) & 0x01
+	val := (cpu.Reg.Read(reg) >> 1) | cpu.Reg.Read(reg)&0x80
+	cpu.Reg.Write(val, reg)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 8, true
 }
 
-func (s *CPU) SRAHL() { // M[reg[HL]] = M[reg[HL]] >> 1, bit 7 unchanged
-	carry := s.GetHLVal() & 0x01
-	val := (s.GetHLVal() >> 1) | s.GetHLVal()&0x80
-	s.SetHLVal(val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(16, 4)
+func (cpu *CPU) SRAHL() (string, int, int, bool) { // M[reg[HL]] = M[reg[HL]] >> 1, bit 7 unchanged
+	opcode := fmt.Sprintf("SRA (HL)")
+	carry := cpu.GetHLVal() & 0x01
+	val := (cpu.GetHLVal() >> 1) | cpu.GetHLVal()&0x80
+	cpu.SetHLVal(val)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 16, true
 }
 
-func (s *CPU) SRLR8(reg string) { // reg[] = reg[] >> 1
-	carry := s.GetReg8Val(reg) & 0x01
-	val := s.GetReg8Val(reg) >> 1
-	s.SetReg8Val(reg, val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(8, 2)
+func (cpu *CPU) SRLR8(reg string) (string, int, int, bool) { // reg[] = reg[] >> 1
+	opcode := fmt.Sprintf("SRL %s", reg)
+	carry := cpu.Reg.Read(reg) & 0x01
+	val := cpu.Reg.Read(reg) >> 1
+	cpu.Reg.Write(val, reg)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 8, true
 }
 
-func (s *CPU) SRLHL() { // M[reg[HL]] = M[reg[HL]] >> 1
-	carry := s.GetHLVal() & 0x01
-	val := s.GetHLVal() >> 1
-	s.SetHLVal(val)
-	s.SetFlagRL(val, carry)
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-	s.SetClockTime(16, 4)
+func (cpu *CPU) SRLHL() (string, int, int, bool) { // M[reg[HL]] = M[reg[HL]] >> 1
+	opcode := fmt.Sprintf("SRL (HL)")
+	carry := cpu.GetHLVal() & 0x01
+	val := cpu.GetHLVal() >> 1
+	cpu.SetHLVal(val)
+	cpu.SetFlagRL(val, carry)
+	return opcode, 2, 16, true
 }

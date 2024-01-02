@@ -4,1006 +4,749 @@ import (
 	"fmt"
 )
 
-func (s *CPU) ExecuteOpcode() {
+func (cpu *CPU) ExecuteOpcode() (string, int, int, bool) {
 
-	switch s.Mem.Read(s.GetReg16Val("PC")) {
+	switch cpu.Mem.Read(cpu.Reg.Read("PC")) {
+
 	case 0x00:
-		s.CurrOpcode = fmt.Sprintf("NOP")
-		s.NOP()
+		return cpu.NOP()
 
 	case 0x01:
-		s.CurrOpcode = fmt.Sprintf("LD BC,$%x ", uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1))+(int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8)))
-		s.LDR16N16("BC")
+		return cpu.LDR16N16("BC")
 
 	case 0x02:
-		s.CurrOpcode = fmt.Sprintf("LD (BC), A")
-		s.LDR16A("BC")
+		return cpu.LDR16A("BC")
 
 	case 0x03:
-		s.CurrOpcode = fmt.Sprintf("INC BC")
-		s.INCR16("BC")
+		return cpu.INCR16("BC")
 
 	case 0x04:
-		s.CurrOpcode = fmt.Sprintf("INC B")
-		s.INCR8("B")
+		return cpu.INCR8("B")
 
 	case 0x05:
-		s.CurrOpcode = fmt.Sprintf("DEC B")
-		s.DECR8("B")
+		return cpu.DECR8("B")
 
 	case 0x06:
-		s.CurrOpcode = fmt.Sprintf("LD B,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDR8N8("B")
+		return cpu.LDR8N8("B")
 
 	case 0x07:
-		s.CurrOpcode = fmt.Sprintf("RLCA")
-		s.RLCA()
+		return cpu.RLCA()
 
 	case 0x08:
-		s.CurrOpcode = fmt.Sprintf("LD (%x), SP", int(s.Mem.Read(s.GetReg16Val("PC")+1))+(int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8))
-		s.LDN16SP()
+		return cpu.LDN16SP()
 
 	case 0x09:
-		s.CurrOpcode = fmt.Sprintf("ADD HL, BC")
-		s.ADDHLR16("BC")
+		return cpu.ADDHLR16("BC")
 
 	case 0x0A:
-		s.CurrOpcode = fmt.Sprintf("LD A, (BC)")
-		s.LDAR16("BC")
+		return cpu.LDAR16("BC")
 
 	case 0x0B:
-		s.CurrOpcode = fmt.Sprintf("DEC BC")
-		s.DECR16("BC")
+		return cpu.DECR16("BC")
 
 	case 0x0C:
-		s.CurrOpcode = fmt.Sprintf("INC C")
-		s.INCR8("C")
+		return cpu.INCR8("C")
 
 	case 0x0D:
-		s.CurrOpcode = fmt.Sprintf("DEC C")
-		s.DECR8("C")
+		return cpu.DECR8("C")
 
 	case 0x0E:
-		s.CurrOpcode = fmt.Sprintf("LD C, $%x", int(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDR8N8("C")
+		return cpu.LDR8N8("C")
 
 	case 0x0F:
-		s.CurrOpcode = fmt.Sprintf("RRCA ")
-		s.RRCA()
+		return cpu.RRCA()
 
 	case 0x10:
-		s.CurrOpcode = fmt.Sprintf("STOP $%x", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
+		opcode := fmt.Sprintf("STOP $%x", int8(cpu.Mem.Read(cpu.Reg.Read("PC")+1)))
+		return opcode, 0, 0, false
 
 	case 0x11:
-		s.CurrOpcode = fmt.Sprintf("LD DE,$%x", uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1))+int(s.Mem.Read(s.GetReg16Val("PC")+2)<<8)))
-		s.LDR16N16("DE")
+		return cpu.LDR16N16("DE")
 
 	case 0x12:
-		s.CurrOpcode = fmt.Sprintf("LD (DE),A")
-		s.LDR16A("DE")
+		return cpu.LDR16A("DE")
 
 	case 0x13:
-		s.CurrOpcode = fmt.Sprintf("INC (DE)")
-		s.INCR16("DE")
+		return cpu.INCR16("DE")
 
 	case 0x14:
-		s.CurrOpcode = fmt.Sprintf("INC D")
-		s.INCR8("D")
+		return cpu.INCR8("D")
 
 	case 0x15:
-		s.CurrOpcode = fmt.Sprintf("DEC D")
-		s.DECR8("D")
+		return cpu.DECR8("D")
 
 	case 0x16:
-		s.CurrOpcode = fmt.Sprintf("LD D,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDR8N8("D")
+		return cpu.LDR8N8("D")
 
 	case 0x17:
-		s.CurrOpcode = fmt.Sprintf("RLA")
-		s.RLA()
+		return cpu.RLA()
 
 	case 0x18:
-		s.CurrOpcode = fmt.Sprintf("JR $%x", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.JRN16()
+		return cpu.JRN16()
 
 	case 0x19:
-		s.CurrOpcode = fmt.Sprintf("ADD HL, DE")
-		s.ADDHLR16("DE")
+		return cpu.ADDHLR16("DE")
 
 	case 0x1A:
-		s.CurrOpcode = fmt.Sprintf("LD A, (DE)")
-		s.LDAR16("DE")
+		return cpu.LDAR16("DE")
 
 	case 0x1B:
-		s.CurrOpcode = fmt.Sprintf("DEC DE")
-		s.DECR16("DE")
+		return cpu.DECR16("DE")
 
 	case 0x1C:
-		s.CurrOpcode = fmt.Sprintf("INC E")
-		s.INCR8("E")
+		return cpu.INCR8("E")
 
 	case 0x1D:
-		s.CurrOpcode = fmt.Sprintf("DEC E")
-		s.DECR8("E")
+		return cpu.DECR8("E")
 
 	case 0x1E:
-		s.CurrOpcode = fmt.Sprintf("LD E,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDR8N8("E")
+		return cpu.LDR8N8("E")
 
 	case 0x1F:
-		s.CurrOpcode = fmt.Sprintf("RRA")
-		s.RRA()
+		return cpu.RRA()
 
 	case 0x20:
-		s.CurrOpcode = fmt.Sprintf("JR NZ,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.JRCCN16("NZ")
+		return cpu.JRCCN16("NZ")
 
 	case 0x21:
-		s.CurrOpcode = fmt.Sprintf("LD HL,$%x", uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1))+(int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8)))
-		s.LDR16N16("HL")
+		return cpu.LDR16N16("HL")
 
 	case 0x22:
-		s.CurrOpcode = fmt.Sprintf("LD (HL+),A")
-		s.LDHLIA()
+		return cpu.LDHLIA()
 
 	case 0x23:
-		s.CurrOpcode = fmt.Sprintf("INC HL")
-		s.INCR16("HL")
+		return cpu.INCR16("HL")
 
 	case 0x24:
-		s.CurrOpcode = fmt.Sprintf("INC H")
-		s.INCR8("H")
+		return cpu.INCR8("H")
 
 	case 0x25:
-		s.CurrOpcode = fmt.Sprintf("DEC H")
-		s.DECR8("H")
+		return cpu.DECR8("H")
 
 	case 0x26:
-		s.CurrOpcode = fmt.Sprintf("LD H,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDR8N8("H")
+		return cpu.LDR8N8("H")
 
 	case 0x27:
-		s.CurrOpcode = fmt.Sprintf("DAA")
-		s.DAA()
+		return cpu.DAA()
 
 	case 0x28:
-		s.CurrOpcode = fmt.Sprintf("JR Z,$%x", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.JRCCN16("Z")
+		return cpu.JRCCN16("Z")
 
 	case 0x29:
-		s.CurrOpcode = fmt.Sprintf("ADD HL,HL")
-		s.ADDHLR16("HL")
+		return cpu.ADDHLR16("HL")
 
 	case 0x2A:
-		s.CurrOpcode = fmt.Sprintf("LD A,(HL+)")
-		s.LDAHLI()
+		return cpu.LDAHLI()
 
 	case 0x2B:
-		s.CurrOpcode = fmt.Sprintf("DEC HL")
-		s.DECR16("HL")
+		return cpu.DECR16("HL")
 
 	case 0x2C:
-		s.CurrOpcode = fmt.Sprintf("INC L")
-		s.INCR8("L")
+		return cpu.INCR8("L")
 
 	case 0x2D:
-		s.CurrOpcode = fmt.Sprintf("DEC L")
-		s.DECR8("L")
+		return cpu.DECR8("L")
 
 	case 0x2E:
-		s.CurrOpcode = fmt.Sprintf("LD L,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDR8N8("L")
+		return cpu.LDR8N8("L")
 
 	case 0x2F:
-		s.CurrOpcode = fmt.Sprintf("CPL")
-		s.CPL()
+		return cpu.CPL()
 
 	case 0x30:
-		s.CurrOpcode = fmt.Sprintf("JR NC,$%x", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.JRCCN16("NC")
+		return cpu.JRCCN16("NC")
 
 	case 0x31:
-		s.CurrOpcode = fmt.Sprintf("LD SP $%x", uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1))+(int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8)))
-		s.LDR16N16("SP")
+		return cpu.LDR16N16("SP")
 
 	case 0x32:
-		s.CurrOpcode = fmt.Sprintf("LD (HL-),A")
-		s.LDHLDA()
+		return cpu.LDHLDA()
 
 	case 0x33:
-		s.CurrOpcode = fmt.Sprintf("INC SP")
-		s.INCR16("SP")
+		return cpu.INCR16("SP")
 
 	case 0x34:
-		s.CurrOpcode = fmt.Sprintf("INC (HL)")
-		s.INCRHL()
+		return cpu.INCRHL()
 
 	case 0x35:
-		s.CurrOpcode = fmt.Sprintf("DEC (HL)")
-		s.DECHL()
+		return cpu.DECHL()
 
 	case 0x36:
-		s.CurrOpcode = fmt.Sprintf("LD (HL),$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDHLN8()
+		return cpu.LDHLN8()
 
 	case 0x37:
-		s.CurrOpcode = fmt.Sprintf("SCF")
-		s.SCF()
+		return cpu.SCF()
 
 	case 0x38:
-		s.CurrOpcode = fmt.Sprintf("JR C,$%x", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.JRCCN16("C")
+		return cpu.JRCCN16("C")
 
 	case 0x39:
-		s.CurrOpcode = fmt.Sprintf("ADD HL,SP")
-		s.ADDHLSP()
+		return cpu.ADDHLSP()
 
 	case 0x3A:
-		s.CurrOpcode = fmt.Sprintf("LD A,(HL-)")
-		s.LDAHLD()
+		return cpu.LDAHLD()
 
 	case 0x3B:
-		s.CurrOpcode = fmt.Sprintf("DEC SP")
-		s.DECR16("SP")
+		return cpu.DECR16("SP")
 
 	case 0x3C:
-		s.CurrOpcode = fmt.Sprintf("INC A")
-		s.INCR8("A")
+		return cpu.INCR8("A")
 
 	case 0x3D:
-		s.CurrOpcode = fmt.Sprintf("DEC A")
-		s.DECR8("A")
+		return cpu.DECR8("A")
 
 	case 0x3E:
-		s.CurrOpcode = fmt.Sprintf("LD A,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDR8N8("A")
+		return cpu.LDR8N8("A")
 
 	case 0x3F:
-		s.CurrOpcode = fmt.Sprintf("CCF")
-		s.CCF()
+		return cpu.CCF()
 
 	case 0x40:
-		s.CurrOpcode = fmt.Sprintf("LD B,B")
-		s.LDR8R8("B", "B")
+		return cpu.LDR8R8("B", "B")
 
 	case 0x41:
-		s.CurrOpcode = fmt.Sprintf("LD B,C")
-		s.LDR8R8("B", "C")
+		return cpu.LDR8R8("B", "C")
 
 	case 0x42:
-		s.CurrOpcode = fmt.Sprintf("LD B,D")
-		s.LDR8R8("B", "D")
+		return cpu.LDR8R8("B", "D")
 
 	case 0x43:
-		s.CurrOpcode = fmt.Sprintf("LD B,E")
-		s.LDR8R8("B", "E")
+		return cpu.LDR8R8("B", "E")
 
 	case 0x44:
-		s.CurrOpcode = fmt.Sprintf("LD B,H")
-		s.LDR8R8("B", "H")
+		return cpu.LDR8R8("B", "H")
 
 	case 0x45:
-		s.CurrOpcode = fmt.Sprintf("LD B,L")
-		s.LDR8R8("B", "L")
+		return cpu.LDR8R8("B", "L")
 
 	case 0x46:
-		s.CurrOpcode = fmt.Sprintf("LD B,(HL)")
-		s.LDR8HL("B")
+		return cpu.LDR8HL("B")
 
 	case 0x47:
-		s.CurrOpcode = fmt.Sprintf("LD B,A")
-		s.LDR8R8("B", "A")
+		return cpu.LDR8R8("B", "A")
 
 	case 0x48:
-		s.CurrOpcode = fmt.Sprintf("LD C,B")
-		s.LDR8R8("C", "B")
+		return cpu.LDR8R8("C", "B")
 
 	case 0x49:
-		s.CurrOpcode = fmt.Sprintf("LD C,C")
-		s.LDR8R8("C", "C")
+		return cpu.LDR8R8("C", "C")
 
 	case 0x4A:
-		s.CurrOpcode = fmt.Sprintf("LD C,D")
-		s.LDR8R8("C", "D")
+		return cpu.LDR8R8("C", "D")
 
 	case 0x4B:
-		s.CurrOpcode = fmt.Sprintf("LD C,E")
-		s.LDR8R8("C", "E")
+		return cpu.LDR8R8("C", "E")
 
 	case 0x4C:
-		s.CurrOpcode = fmt.Sprintf("LD C,H")
-		s.LDR8R8("C", "H")
+		return cpu.LDR8R8("C", "H")
 
 	case 0x4D:
-		s.CurrOpcode = fmt.Sprintf("LD C,L")
-		s.LDR8R8("C", "L")
+		return cpu.LDR8R8("C", "L")
 
 	case 0x4E:
-		s.CurrOpcode = fmt.Sprintf("LD C,(HL)")
-		s.LDR8HL("C")
+		return cpu.LDR8HL("C")
 
 	case 0x4F:
-		s.CurrOpcode = fmt.Sprintf("LD C,A")
-		s.LDR8R8("C", "A")
+		return cpu.LDR8R8("C", "A")
 
 	case 0x50:
-		s.CurrOpcode = fmt.Sprintf("LD D,B")
-		s.LDR8R8("D", "B")
+		return cpu.LDR8R8("D", "B")
 
 	case 0x51:
-		s.CurrOpcode = fmt.Sprintf("LD D,C")
-		s.LDR8R8("D", "C")
+		return cpu.LDR8R8("D", "C")
 
 	case 0x52:
-		s.CurrOpcode = fmt.Sprintf("LD D,D")
-		s.LDR8R8("D", "D")
+		return cpu.LDR8R8("D", "D")
 
 	case 0x53:
-		s.CurrOpcode = fmt.Sprintf("LD D,E")
-		s.LDR8R8("D", "E")
+		return cpu.LDR8R8("D", "E")
 
 	case 0x54:
-		s.CurrOpcode = fmt.Sprintf("LD D,H")
-		s.LDR8R8("D", "H")
+		return cpu.LDR8R8("D", "H")
 
 	case 0x55:
-		s.CurrOpcode = fmt.Sprintf("LD D,L")
-		s.LDR8R8("D", "L")
+		return cpu.LDR8R8("D", "L")
 
 	case 0x56:
-		s.CurrOpcode = fmt.Sprintf("LD D,(HL)")
-		s.LDR8HL("D")
+		return cpu.LDR8HL("D")
 
 	case 0x57:
-		s.CurrOpcode = fmt.Sprintf("LD D,A")
-		s.LDR8R8("D", "A")
+		return cpu.LDR8R8("D", "A")
 
 	case 0x58:
-		s.CurrOpcode = fmt.Sprintf("LD E,B")
-		s.LDR8R8("E", "B")
+		return cpu.LDR8R8("E", "B")
 
 	case 0x59:
-		s.CurrOpcode = fmt.Sprintf("LD E,C")
-		s.LDR8R8("E", "C")
+		return cpu.LDR8R8("E", "C")
 
 	case 0x5A:
-		s.CurrOpcode = fmt.Sprintf("LD E,D")
-		s.LDR8R8("E", "D")
+		return cpu.LDR8R8("E", "D")
 
 	case 0x5B:
-		s.CurrOpcode = fmt.Sprintf("LD E,E")
-		s.LDR8R8("E", "E")
+		return cpu.LDR8R8("E", "E")
 
 	case 0x5C:
-		s.CurrOpcode = fmt.Sprintf("LD E,H")
-		s.LDR8R8("E", "H")
+		return cpu.LDR8R8("E", "H")
 
 	case 0x5D:
-		s.CurrOpcode = fmt.Sprintf("LD E,L")
-		s.LDR8R8("E", "L")
+		return cpu.LDR8R8("E", "L")
 
 	case 0x5E:
-		s.CurrOpcode = fmt.Sprintf("LD E,(HL)")
-		s.LDR8HL("E")
+		return cpu.LDR8HL("E")
 
 	case 0x5F:
-		s.CurrOpcode = fmt.Sprintf("LD E,A")
-		s.LDR8R8("E", "A")
+		return cpu.LDR8R8("E", "A")
 
 	case 0x60:
-		s.CurrOpcode = fmt.Sprintf("LD H,B")
-		s.LDR8R8("H", "B")
+		return cpu.LDR8R8("H", "B")
 
 	case 0x61:
-		s.CurrOpcode = fmt.Sprintf("LD H,C")
-		s.LDR8R8("H", "C")
+		return cpu.LDR8R8("H", "C")
 
 	case 0x62:
-		s.CurrOpcode = fmt.Sprintf("LD H,D")
-		s.LDR8R8("H", "D")
+		return cpu.LDR8R8("H", "D")
 
 	case 0x63:
-		s.CurrOpcode = fmt.Sprintf("LD H,E")
-		s.LDR8R8("H", "E")
+		return cpu.LDR8R8("H", "E")
 
 	case 0x64:
-		s.CurrOpcode = fmt.Sprintf("LD H,H")
-		s.LDR8R8("H", "H")
+		return cpu.LDR8R8("H", "H")
 
 	case 0x65:
-		s.CurrOpcode = fmt.Sprintf("LD H,L")
-		s.LDR8R8("H", "L")
+		return cpu.LDR8R8("H", "L")
 
 	case 0x66:
-		s.CurrOpcode = fmt.Sprintf("LD H,(HL)")
-		s.LDR8HL("H")
+		return cpu.LDR8HL("H")
 
 	case 0x67:
-		s.CurrOpcode = fmt.Sprintf("LD H,A")
-		s.LDR8R8("H", "A")
+		return cpu.LDR8R8("H", "A")
 
 	case 0x68:
-		s.CurrOpcode = fmt.Sprintf("LD L,B")
-		s.LDR8R8("L", "B")
+		return cpu.LDR8R8("L", "B")
 
 	case 0x69:
-		s.CurrOpcode = fmt.Sprintf("LD L,C")
-		s.LDR8R8("L", "C")
+		return cpu.LDR8R8("L", "C")
 
 	case 0x6A:
-		s.CurrOpcode = fmt.Sprintf("LD L,D")
-		s.LDR8R8("L", "D")
+		return cpu.LDR8R8("L", "D")
 
 	case 0x6B:
-		s.CurrOpcode = fmt.Sprintf("LD L,E")
-		s.LDR8R8("L", "E")
+		return cpu.LDR8R8("L", "E")
 
 	case 0x6C:
-		s.CurrOpcode = fmt.Sprintf("LD L,H")
-		s.LDR8R8("L", "H")
+		return cpu.LDR8R8("L", "H")
 
 	case 0x6D:
-		s.CurrOpcode = fmt.Sprintf("LD L,L")
-		s.LDR8R8("L", "L")
+		return cpu.LDR8R8("L", "L")
 
 	case 0x6E:
-		s.CurrOpcode = fmt.Sprintf("LD L,(HL)")
-		s.LDR8HL("L")
+		return cpu.LDR8HL("L")
 
 	case 0x6F:
-		s.CurrOpcode = fmt.Sprintf("LD L,A")
-		s.LDR8R8("L", "A")
+		return cpu.LDR8R8("L", "A")
 
 	case 0x70:
-		s.CurrOpcode = fmt.Sprintf("LD (HL),B")
-		s.LDHLR8("B")
+		return cpu.LDHLR8("B")
 
 	case 0x71:
-		s.CurrOpcode = fmt.Sprintf("LD (HL),C")
-		s.LDHLR8("C")
+		return cpu.LDHLR8("C")
 
 	case 0x72:
-		s.CurrOpcode = fmt.Sprintf("LD (HL),D")
-		s.LDHLR8("D")
+		return cpu.LDHLR8("D")
 
 	case 0x73:
-		s.CurrOpcode = fmt.Sprintf("LD (HL),E")
-		s.LDHLR8("E")
+		return cpu.LDHLR8("E")
 
 	case 0x74:
-		s.CurrOpcode = fmt.Sprintf("LD (HL),H")
-		s.LDHLR8("H")
+		return cpu.LDHLR8("H")
 
 	case 0x75:
-		s.CurrOpcode = fmt.Sprintf("LD (HL),L")
-		s.LDHLR8("L")
+		return cpu.LDHLR8("L")
 
 	case 0x76:
-		s.CurrOpcode = fmt.Sprintf("HALT")
-		s.HALT()
+		return cpu.HALT()
 
 	case 0x77:
-		s.CurrOpcode = fmt.Sprintf("LD (HL),A")
-		s.LDHLR8("A")
+		return cpu.LDHLR8("A")
 
 	case 0x78:
-		s.CurrOpcode = fmt.Sprintf("LD A,B")
-		s.LDR8R8("A", "B")
+		return cpu.LDR8R8("A", "B")
 
 	case 0x79:
-		s.CurrOpcode = fmt.Sprintf("LD A,C")
-		s.LDR8R8("A", "C")
+		return cpu.LDR8R8("A", "C")
 
 	case 0x7A:
-		s.CurrOpcode = fmt.Sprintf("LD A,D")
-		s.LDR8R8("A", "D")
+		return cpu.LDR8R8("A", "D")
 
 	case 0x7B:
-		s.CurrOpcode = fmt.Sprintf("LD A,E")
-		s.LDR8R8("A", "E")
+		return cpu.LDR8R8("A", "E")
 
 	case 0x7C:
-		s.CurrOpcode = fmt.Sprintf("LD A,H")
-		s.LDR8R8("A", "H")
+		return cpu.LDR8R8("A", "H")
 
 	case 0x7D:
-		s.CurrOpcode = fmt.Sprintf("LD A,L")
-		s.LDR8R8("A", "L")
+		return cpu.LDR8R8("A", "L")
 
 	case 0x7E:
-		s.CurrOpcode = fmt.Sprintf("LD A,(HL)")
-		s.LDR8HL("A")
+		return cpu.LDR8HL("A")
 
 	case 0x7F:
-		s.CurrOpcode = fmt.Sprintf("LD A,A")
-		s.LDR8R8("A", "A")
+		return cpu.LDR8R8("A", "A")
 
 	case 0x80:
-		s.CurrOpcode = fmt.Sprintf("ADD A,B")
-		s.ADDAR8("B")
+		return cpu.ADDAR8("B")
 
 	case 0x81:
-		s.CurrOpcode = fmt.Sprintf("ADD A,C")
-		s.ADDAR8("C")
+		return cpu.ADDAR8("C")
 
 	case 0x82:
-		s.CurrOpcode = fmt.Sprintf("ADD A,D")
-		s.ADDAR8("D")
+		return cpu.ADDAR8("D")
 
 	case 0x83:
-		s.ADDAR8("E")
-		s.CurrOpcode = fmt.Sprintf("ADD A,E")
+		return cpu.ADDAR8("E")
 
 	case 0x84:
-		s.CurrOpcode = fmt.Sprintf("ADD A,H")
-		s.ADDAR8("H")
+		return cpu.ADDAR8("H")
 
 	case 0x85:
-		s.CurrOpcode = fmt.Sprintf("ADD A,L")
-		s.ADDAR8("L")
+		return cpu.ADDAR8("L")
 
 	case 0x86:
-		s.CurrOpcode = fmt.Sprintf("ADD A,(HL)")
-		s.ADDAHL()
+		return cpu.ADDAHL()
 
 	case 0x87:
-		s.CurrOpcode = fmt.Sprintf("ADD A,A")
-		s.ADDAR8("A")
+		return cpu.ADDAR8("A")
 
 	case 0x88:
-		s.CurrOpcode = fmt.Sprintf("ADC A,B")
-		s.ADCAR8("B")
+		return cpu.ADCAR8("B")
 
 	case 0x89:
-		s.CurrOpcode = fmt.Sprintf("ADC A,C")
-		s.ADCAR8("C")
+		return cpu.ADCAR8("C")
 
 	case 0x8A:
-		s.CurrOpcode = fmt.Sprintf("ADC A,D")
-		s.ADCAR8("D")
+		return cpu.ADCAR8("D")
 
 	case 0x8B:
-		s.CurrOpcode = fmt.Sprintf("ADC A,E")
-		s.ADCAR8("E")
+		return cpu.ADCAR8("E")
 
 	case 0x8C:
-		s.CurrOpcode = fmt.Sprintf("ADC A,H")
-		s.ADCAR8("H")
+		return cpu.ADCAR8("H")
 
 	case 0x8D:
-		s.CurrOpcode = fmt.Sprintf("ADC A,L")
-		s.ADCAR8("L")
+		return cpu.ADCAR8("L")
 
 	case 0x8E:
-		s.CurrOpcode = fmt.Sprintf("ADC A,(HL)")
-		s.ADCAHL()
+		return cpu.ADCAHL()
 
 	case 0x8F:
-		s.CurrOpcode = fmt.Sprintf("ADC A,A")
-		s.ADCAR8("A")
+		return cpu.ADCAR8("A")
 
 	case 0x90:
-		s.CurrOpcode = fmt.Sprintf("SUB A,B")
-		s.SUBAR8("B")
+		return cpu.SUBAR8("B")
 
 	case 0x91:
-		s.CurrOpcode = fmt.Sprintf("SUB A,C")
-		s.SUBAR8("C")
+		return cpu.SUBAR8("C")
 
 	case 0x92:
-		s.CurrOpcode = fmt.Sprintf("SUB A,D")
-		s.SUBAR8("D")
+		return cpu.SUBAR8("D")
 
 	case 0x93:
-		s.CurrOpcode = fmt.Sprintf("SUB A,E")
-		s.SUBAR8("E")
+		return cpu.SUBAR8("E")
 
 	case 0x94:
-		s.CurrOpcode = fmt.Sprintf("SUB A,H")
-		s.SUBAR8("H")
+		return cpu.SUBAR8("H")
 
 	case 0x95:
-		s.CurrOpcode = fmt.Sprintf("SUB A,L")
-		s.SUBAR8("L")
+		return cpu.SUBAR8("L")
 
 	case 0x96:
-		s.CurrOpcode = fmt.Sprintf("SUB A,(HL)")
-		s.SUBAHL()
+		return cpu.SUBAHL()
 
 	case 0x97:
-		s.CurrOpcode = fmt.Sprintf("SUB A,A")
-		s.SUBAR8("A")
+		return cpu.SUBAR8("A")
 
 	case 0x98:
-		s.CurrOpcode = fmt.Sprintf("SBC A,B")
-		s.SBCAR8("B")
+		return cpu.SBCAR8("B")
 
 	case 0x99:
-		s.CurrOpcode = fmt.Sprintf("SBC A,C")
-		s.SBCAR8("C")
+		return cpu.SBCAR8("C")
 
 	case 0x9A:
-		s.CurrOpcode = fmt.Sprintf("SBC A,D")
-		s.SBCAR8("D")
+		return cpu.SBCAR8("D")
 
 	case 0x9B:
-		s.CurrOpcode = fmt.Sprintf("SBC A,E")
-		s.SBCAR8("E")
+		return cpu.SBCAR8("E")
 
 	case 0x9C:
-		s.CurrOpcode = fmt.Sprintf("SBC A,H")
-		s.SBCAR8("H")
+		return cpu.SBCAR8("H")
 
 	case 0x9D:
-		s.CurrOpcode = fmt.Sprintf("SBC A,L")
-		s.SBCAR8("L")
+		return cpu.SBCAR8("L")
 
 	case 0x9E:
-		s.CurrOpcode = fmt.Sprintf("SBC A,(HL)")
-		s.SBCAHL()
+		return cpu.SBCAHL()
 
 	case 0x9F:
-		s.CurrOpcode = fmt.Sprintf("SBC A,A")
-		s.SBCAR8("A")
+		return cpu.SBCAR8("A")
 
 	case 0xA0:
-		s.CurrOpcode = fmt.Sprintf("AND A,B")
-		s.ANDAR8("B")
+		return cpu.ANDAR8("B")
 
 	case 0xA1:
-		s.CurrOpcode = fmt.Sprintf("AND A,C")
-		s.ANDAR8("C")
+		return cpu.ANDAR8("C")
 
 	case 0xA2:
-		s.CurrOpcode = fmt.Sprintf("AND A,D")
-		s.ANDAR8("D")
+		return cpu.ANDAR8("D")
 
 	case 0xA3:
-		s.CurrOpcode = fmt.Sprintf("AND A,E")
-		s.ANDAR8("E")
+		return cpu.ANDAR8("E")
 
 	case 0xA4:
-		s.CurrOpcode = fmt.Sprintf("AND A,H")
-		s.ANDAR8("H")
+		return cpu.ANDAR8("H")
 
 	case 0xA5:
-		s.CurrOpcode = fmt.Sprintf("AND A,L")
-		s.ANDAR8("L")
+		return cpu.ANDAR8("L")
 
 	case 0xA6:
-		s.CurrOpcode = fmt.Sprintf("AND A,(HL)")
-		s.ANDAHL()
+		return cpu.ANDAHL()
 
 	case 0xA7:
-		s.CurrOpcode = fmt.Sprintf("AND A,A")
-		s.ANDAR8("A")
+		return cpu.ANDAR8("A")
 
 	case 0xA8:
-		s.CurrOpcode = fmt.Sprintf("XOR A,B")
-		s.XORAR8("B")
+		return cpu.XORAR8("B")
 
 	case 0xA9:
-		s.CurrOpcode = fmt.Sprintf("XOR A,C")
-		s.XORAR8("C")
+		return cpu.XORAR8("C")
 
 	case 0xAA:
-		s.CurrOpcode = fmt.Sprintf("XOR A,D")
-		s.XORAR8("D")
+		return cpu.XORAR8("D")
 
 	case 0xAB:
-		s.CurrOpcode = fmt.Sprintf("XOR A,E")
-		s.XORAR8("E")
+		return cpu.XORAR8("E")
 
 	case 0xAC:
-		s.CurrOpcode = fmt.Sprintf("XOR A,H")
-		s.XORAR8("H")
+		return cpu.XORAR8("H")
 
 	case 0xAD:
-		s.CurrOpcode = fmt.Sprintf("XOR A,L")
-		s.XORAR8("L")
+		return cpu.XORAR8("L")
 
 	case 0xAE:
-		s.CurrOpcode = fmt.Sprintf("XOR A,(HL)")
-		s.XORAHL()
+		return cpu.XORAHL()
 
 	case 0xAF:
-		s.CurrOpcode = fmt.Sprintf("XOR A,A")
-		s.XORAR8("A")
+		return cpu.XORAR8("A")
 
 	case 0xB0:
-		s.CurrOpcode = fmt.Sprintf("OR A,B")
-		s.ORAR8("B")
+		return cpu.ORAR8("B")
 
 	case 0xB1:
-		s.CurrOpcode = fmt.Sprintf("OR A,C")
-		s.ORAR8("C")
+		return cpu.ORAR8("C")
 
 	case 0xB2:
-		s.CurrOpcode = fmt.Sprintf("OR A,D")
-		s.ORAR8("D")
+		return cpu.ORAR8("D")
 
 	case 0xB3:
-		s.CurrOpcode = fmt.Sprintf("OR A,E")
-		s.ORAR8("E")
+		return cpu.ORAR8("E")
 
 	case 0xB4:
-		s.CurrOpcode = fmt.Sprintf("OR A,H")
-		s.ORAR8("H")
+		return cpu.ORAR8("H")
 
 	case 0xB5:
-		s.CurrOpcode = fmt.Sprintf("OR A,L")
-		s.ORAR8("L")
+		return cpu.ORAR8("L")
 
 	case 0xB6:
-		s.CurrOpcode = fmt.Sprintf("OR A,(HL)")
-		s.ORAHL()
+		return cpu.ORAHL()
 
 	case 0xB7:
-		s.CurrOpcode = fmt.Sprintf("OR A,A")
-		s.ORAR8("A")
+		return cpu.ORAR8("A")
 
 	case 0xB8:
-		s.CurrOpcode = fmt.Sprintf("CP A,B")
-		s.CPAR8("B")
+		return cpu.CPAR8("B")
 
 	case 0xB9:
-		s.CurrOpcode = fmt.Sprintf("CP A,C")
-		s.CPAR8("C")
+		return cpu.CPAR8("C")
 
 	case 0xBA:
-		s.CurrOpcode = fmt.Sprintf("CP A,D")
-		s.CPAR8("D")
+		return cpu.CPAR8("D")
 
 	case 0xBB:
-		s.CurrOpcode = fmt.Sprintf("CP A,E")
-		s.CPAR8("E")
+		return cpu.CPAR8("E")
 
 	case 0xBC:
-		s.CurrOpcode = fmt.Sprintf("CP A,H")
-		s.CPAR8("H")
+		return cpu.CPAR8("H")
 
 	case 0xBD:
-		s.CurrOpcode = fmt.Sprintf("CP A,L")
-		s.CPAR8("L")
+		return cpu.CPAR8("L")
 
 	case 0xBE:
-		s.CurrOpcode = fmt.Sprintf("CP A,(HL)")
-		s.CPAHL()
+		return cpu.CPAHL()
 
 	case 0xBF:
-		s.CurrOpcode = fmt.Sprintf("CP A,A")
-		s.CPAR8("A")
+		return cpu.CPAR8("A")
 
 	case 0xC0:
-		s.CurrOpcode = fmt.Sprintf("RET NZ")
-		s.RETCC("NZ")
+		return cpu.RETCC("NZ")
 
 	case 0xC1:
-		s.CurrOpcode = fmt.Sprintf("POP BC")
-		s.POPR16("BC")
+		return cpu.POPR16("BC")
 
 	case 0xC2:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.CurrOpcode = fmt.Sprintf("JP NZ,$%x ", addr)
-		s.JPCCN16("NZ", addr)
+		return cpu.JPCCN16("NZ")
 
 	case 0xC3:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.CurrOpcode = fmt.Sprintf("JP $%x ", addr)
-		s.JPN16(addr)
+		addr := cpu.Mem.Read(cpu.Reg.Read("PC")+1) + cpu.Mem.Read(cpu.Reg.Read("PC")+2)<<8
+		return cpu.JPN16(addr)
 
 	case 0xC4:
-		addr := int(uint16(s.Mem.Read(s.GetReg16Val("PC")+1)) + (uint16(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8))
-		s.CurrOpcode = fmt.Sprintf("CALL NZ,$%x ", addr)
-		s.CALLCCN16("NZ", addr)
+		return cpu.CALLCCN16("NZ")
 
 	case 0xC5:
-		s.CurrOpcode = fmt.Sprintf("PUSH BC")
-		s.PUSHR16("BC")
+		return cpu.PUSHR16("BC")
 
 	case 0xC6:
-		s.CurrOpcode = fmt.Sprintf("ADD A,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.ADDAN8()
+		return cpu.ADDAN8()
 
 	case 0xC7:
-		s.CurrOpcode = fmt.Sprintf("RST 00H")
-		s.RST("00H")
+		return cpu.RST("00H")
 
 	case 0xC8:
-		s.CurrOpcode = fmt.Sprintf("RET Z")
-		s.RETCC("Z")
+		return cpu.RETCC("Z")
 
 	case 0xC9:
-		s.CurrOpcode = fmt.Sprintf("RET")
-		s.RET()
+		return cpu.RET()
 
 	case 0xCA:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.JPCCN16("Z", addr)
-		s.CurrOpcode = fmt.Sprintf("JP Z,$%x", addr)
+		return cpu.JPCCN16("Z")
 
 	case 0xCB:
-		s.PrefixTable()
+		return cpu.PrefixTable()
 
 	case 0xCC:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.CurrOpcode = fmt.Sprintf("CALL Z,$%x", addr)
-		s.CALLCCN16("Z", addr)
+		return cpu.CALLCCN16("Z")
 
 	case 0xCD:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.CurrOpcode = fmt.Sprintf("CALL $%x", addr)
-		s.CALLN16(addr)
+		return cpu.CALLN16()
 
 	case 0xCE:
-		s.CurrOpcode = fmt.Sprintf("ADC A,$%x", int(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.ADCAN8()
+		return cpu.ADCAN8()
 
 	case 0xCF:
-		s.CurrOpcode = fmt.Sprintf("RST 08H")
-		s.RST("08H")
+		return cpu.RST("08H")
 
 	case 0xD0:
-		s.CurrOpcode = fmt.Sprintf("RET NC")
-		s.RETCC("NC")
+		return cpu.RETCC("NC")
 
 	case 0xD1:
-		s.CurrOpcode = fmt.Sprintf("POP DE")
-		s.POPR16("DE")
+		return cpu.POPR16("DE")
 
 	case 0xD2:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.CurrOpcode = fmt.Sprintf("JP NC,$%x ", addr)
-		s.JPCCN16("NC", addr)
+		return cpu.JPCCN16("NC")
 
 	case 0xD4:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.CurrOpcode = fmt.Sprintf("CALL NC,$%x ", addr)
-		s.CALLCCN16("NC", addr)
+		return cpu.CALLCCN16("NC")
 
 	case 0xD5:
-		s.CurrOpcode = fmt.Sprintf("PUSH DE")
-		s.PUSHR16("DE")
+		return cpu.PUSHR16("DE")
 
 	case 0xD6:
-		s.CurrOpcode = fmt.Sprintf("SUB A,$%x", int(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.SUBAN8()
+		return cpu.SUBAN8()
 
 	case 0xD7:
-		s.CurrOpcode = fmt.Sprintf("RST 10H")
-		s.RST("10H")
+		return cpu.RST("10H")
 
 	case 0xD8:
-		s.CurrOpcode = fmt.Sprintf("RET C")
-		s.RETCC("C")
+		return cpu.RETCC("C")
 
 	case 0xD9:
-		s.CurrOpcode = fmt.Sprintf("RETI")
-		s.RETI()
+		return cpu.RETI()
 
 	case 0xDA:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.CurrOpcode = fmt.Sprintf("JP C,$%x", addr)
-		s.JPCCN16("C", addr)
+		return cpu.JPCCN16("C")
 
 	case 0xDC:
-		addr := int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)
-		s.CurrOpcode = fmt.Sprintf("CALL C,$%x", addr)
-		s.CALLCCN16("C", addr)
+		return cpu.CALLCCN16("C")
 
 	case 0xDE:
-		s.CurrOpcode = fmt.Sprintf("SBC A,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.SBCAN8()
+		return cpu.SBCAN8()
 
 	case 0xDF:
-		s.CurrOpcode = fmt.Sprintf("RST 18H")
-		s.RST("18H")
+		return cpu.RST("18H")
 
 	case 0xE0:
-		addr := int(uint16(0xFF00 + int(s.Mem.Read(s.GetReg16Val("PC")+1))))
-		s.CurrOpcode = fmt.Sprintf("LD $(%x),A", addr)
-		s.LDN16A(addr)
-		s.SetReg16Val("PC", s.GetReg16Val("PC")-1)
+		return cpu.LDHU8A()
 
 	case 0xE1:
-		s.CurrOpcode = fmt.Sprintf("POP HL")
-		s.POPR16("HL")
+		return cpu.POPR16("HL")
 
 	case 0xE2:
-		s.CurrOpcode = fmt.Sprintf("LD ($FF00+C),A")
-		s.LDN16A(int(uint16(0xFF00 + int(s.GetReg8Val("C")))))
-		s.SetReg16Val("PC", s.GetReg16Val("PC")-2)
+		return cpu.LDHCA()
 
 	case 0xE5:
-		s.CurrOpcode = fmt.Sprintf("PUSH HL")
-		s.PUSHR16("HL")
+		return cpu.PUSHR16("HL")
 
 	case 0xE6:
-		s.CurrOpcode = fmt.Sprintf("AND A,$%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.ANDAN8()
+		return cpu.ANDAN8()
 
 	case 0xE7:
-		s.RST("20H")
-		s.CurrOpcode = fmt.Sprintf("RST 20H")
+		return cpu.RST("20H")
 
 	case 0xE8:
-		s.ADDSPE8()
-		s.CurrOpcode = fmt.Sprintf("ADD SP,%x", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
+		return cpu.ADDSPE8()
 
 	case 0xE9:
-		s.CurrOpcode = fmt.Sprintf("JP HL")
-		s.JPHL()
+		return cpu.JPHL()
 
 	case 0xEA:
-		addr := int(uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1)) + (int(s.Mem.Read(s.GetReg16Val("PC")+2)) << 8)))
-		s.CurrOpcode = fmt.Sprintf("LD ($%x),A", addr)
-		s.LDN16A(addr)
+		return cpu.LDN16A()
 
 	case 0xEE:
-		s.CurrOpcode = fmt.Sprintf("XOR $%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.XORAN8()
+		return cpu.XORAN8()
 
 	case 0xEF:
-		s.CurrOpcode = fmt.Sprintf("RST 28H")
-		s.RST("28H")
+		return cpu.RST("28H")
 
 	case 0xF0:
-		addr := int(uint16(0xFF00 + int(uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))))
-		s.CurrOpcode = fmt.Sprintf("LD A,($%x)", addr)
-		s.LDAN16(addr)
+		return cpu.LDHAU8()
 
 	case 0xF1:
-		s.CurrOpcode = fmt.Sprintf("POP AF")
-		s.POPFA()
+		return cpu.POPFA()
 
 	case 0xF2:
-		s.CurrOpcode = fmt.Sprintf("LD A,(0xFF00+C)")
-		s.LDAN16(int(uint16(0xFF00 + s.GetReg8Val("C"))))
-		s.SetReg16Val("PC", s.GetReg16Val("PC")-1)
+		return cpu.LDHAC()
 
 	case 0xF3:
-		s.CurrOpcode = fmt.Sprintf("DI")
-		s.DI()
+		return cpu.DI()
 
 	case 0xF4:
 
 	case 0xF5:
-		s.CurrOpcode = fmt.Sprintf("PUSH AF")
-		s.PUSHFA()
+		return cpu.PUSHFA()
 
 	case 0xF6:
-		s.CurrOpcode = fmt.Sprintf("OR A,$%x", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.ORAN8()
+		return cpu.ORAN8()
 
 	case 0xF7:
-		s.CurrOpcode = fmt.Sprintf("RST 30H")
-		s.RST("30H")
+		return cpu.RST("30H")
 
 	case 0xF8:
-		s.CurrOpcode = fmt.Sprintf("LD HL,SP+%x", int8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.LDHLSPE8()
+		return cpu.LDHLSPE8()
 
 	case 0xF9:
-		s.CurrOpcode = fmt.Sprintf("LD SP,HL")
-		s.LDSPHL()
+		return cpu.LDSPHL()
 
 	case 0xFA:
-		addr := int(uint16(int(s.Mem.Read(s.GetReg16Val("PC")+1)) + int(s.Mem.Read(s.GetReg16Val("PC")+2))<<8))
-		s.CurrOpcode = fmt.Sprintf("LD A,($%x)", addr)
-		s.LDAN16(addr)
-		s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
+		return cpu.LDAN16()
 
 	case 0xFB:
-		s.CurrOpcode = fmt.Sprintf("EI")
-		s.EI()
+		return cpu.EI()
 
 	case 0xFE:
-		s.CurrOpcode = fmt.Sprintf("CP $%x", uint8(s.Mem.Read(s.GetReg16Val("PC")+1)))
-		s.CPAN8()
+		return cpu.CPAN8()
 
 	case 0xFF:
-		s.CurrOpcode = fmt.Sprintf("RST 38H")
-		s.RST("38H")
+		return cpu.RST("38H")
 
 	}
+	return "", 0, 0, false
 }

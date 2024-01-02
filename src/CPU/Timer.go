@@ -13,28 +13,24 @@ var bitPos = map[int]int{
 	3: 7,
 }
 
-func (s *CPU) IncrTimer() {
-	s.TotalM += s.M
-	s.TotalT += s.T
+func (cpu *CPU) IncrTimer(t int) {
+	cpu.TotalT += t
 
-	for i := 0; i < s.T; i++ {
-		s.Sysclk = (s.Sysclk + 1) & 0xFFFF
-		s.Mem.Write(s.Sysclk&0xFF, 0xFF04)
-		timerEnable := (int(s.Mem.Read(0xFF07)) >> 2) & 1
-		a := int(s.Mem.Read(0xFF07)) & 0x03
-		b := (s.Mem.Read(0xFF04) >> bitPos[a]) & 1
-		currLevel := b & byte(timerEnable)
-		if s.Level == 1 && currLevel == 0 {
-			if int(s.Mem.Read(0xFF05)) == 0xFF {
-				s.Mem.Write(int(s.Mem.Read(0xFF06)), 0xFF05)
-				s.SetIFBit(2)
+	for i := 0; i < t; i++ {
+		cpu.Sysclk = (cpu.Sysclk + 1) & 0xFFFF
+		cpu.Mem.Write(cpu.Sysclk&0xFF, 0xFF04)
+		timerEnable := (cpu.Mem.Read(0xFF07) >> 2) & 1
+		a := cpu.Mem.Read(0xFF07) & 0x03
+		b := (cpu.Mem.Read(0xFF04) >> bitPos[a]) & 1
+		currLevel := b & timerEnable
+		if cpu.Level == 1 && currLevel == 0 {
+			if cpu.Mem.Read(0xFF05) == 0xFF {
+				cpu.Mem.Write(cpu.Mem.Read(0xFF06), 0xFF05)
+				cpu.SetIFBit(2)
 			} else {
-				s.Mem.Write(int(s.Mem.Read(0xFF05))+1, 0xFF05)
+				cpu.Mem.Write(cpu.Mem.Read(0xFF05)+1, 0xFF05)
 			}
 		}
-		s.Level = int(currLevel)
+		cpu.Level = int(currLevel)
 	}
-
-	s.T = 0
-	s.M = 0
 }

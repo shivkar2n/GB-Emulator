@@ -1,52 +1,53 @@
 package CPU
 
-func (s *CPU) EI() {
-	s.IME = true
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+import "fmt"
+
+func (cpu *CPU) EI() (string, int, int, bool) {
+	opcode := fmt.Sprintf("EI")
+	cpu.IME = true
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) DI() {
-	s.IME = false
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) DI() (string, int, int, bool) {
+	opcode := fmt.Sprintf("DI")
+	cpu.IME = false
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) CPL() { // Reg[A] = ~Reg[A]
-	s.SetReg8Val("A", ^s.GetReg8Val("A"))
-	s.SetFlag("N")
-	s.SetFlag("H")
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) CPL() (string, int, int, bool) { // Reg[A] = ~Reg[A]
+	opcode := fmt.Sprintf("CPL")
+	cpu.Reg.Write(^cpu.Reg.Read("A"), "A")
+	cpu.SetFlag("N")
+	cpu.SetFlag("H")
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) SCF() { // Flag[C] = true
-	s.ResetFlag("N")
-	s.ResetFlag("H")
-	s.SetFlag("C")
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) SCF() (string, int, int, bool) { // Flag[C] = true
+	opcode := fmt.Sprintf("SCF")
+	cpu.ResetFlag("N")
+	cpu.ResetFlag("H")
+	cpu.SetFlag("C")
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) CCF() { // Flag[C] = ~Flag[C]
-	if s.GetFlag("C") == 1 {
-		s.ResetFlag("C")
+func (cpu *CPU) CCF() (string, int, int, bool) { // Flag[C] = ~Flag[C]
+	opcode := fmt.Sprintf("CCF")
+	if cpu.GetFlag("C") == 1 {
+		cpu.ResetFlag("C")
 	} else {
-		s.SetFlag("C")
+		cpu.SetFlag("C")
 	}
-	s.ResetFlag("N")
-	s.ResetFlag("H")
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+	cpu.ResetFlag("N")
+	cpu.ResetFlag("H")
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) NOP() {
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) NOP() (string, int, int, bool) {
+	opcode := fmt.Sprintf("NOP")
+	return opcode, 1, 4, true
 }
 
-func (s *CPU) HALT() {
-	s.StopExec = true
-	s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-	s.SetClockTime(4, 1)
+func (cpu *CPU) HALT() (string, int, int, bool) {
+	opcode := fmt.Sprintf("HALT")
+	return opcode, 1, 4, false
 }

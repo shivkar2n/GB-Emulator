@@ -1,81 +1,94 @@
 package CPU
 
-func (s *CPU) JPN16(op int) { // reg[PC] = n16
-	s.SetReg16Val("PC", op)
-	s.SetClockTime(16, 4)
+import "fmt"
+
+func (cpu *CPU) JPN16(op int) (string, int, int, bool) { // reg[PC] = n16
+	opcode := fmt.Sprintf("JP $%x ", op)
+	cpu.Reg.Write(op, "PC")
+	return opcode, 0, 16, true
 }
 
-func (s *CPU) JPCCN16(cc string, op int) { // reg[PC] = n16, if cc == true
-	if s.checkCC(cc) {
-		s.JPN16(op)
-	} else {
-		s.SetReg16Val("PC", s.GetReg16Val("PC")+3)
-		s.SetClockTime(12, 3)
+func (cpu *CPU) JPCCN16(cc string) (string, int, int, bool) { // reg[PC] = n16, if cc == true
+	addr := cpu.Mem.Read(cpu.Reg.Read("PC")+1) + cpu.Mem.Read(cpu.Reg.Read("PC")+2)<<8
+	opcode := fmt.Sprintf("JP %s,$%x ", cc, addr)
+	if cpu.checkCC(cc) {
+		cpu.JPN16(addr)
+		return opcode, 0, 16, true
 	}
+	return opcode, 3, 12, true
+
 }
 
-func (s *CPU) JPHL() { // reg[PC] = reg[HL]
-	s.SetReg16Val("PC", s.GetReg16Val("HL"))
-	s.SetClockTime(4, 1)
+func (cpu *CPU) JPHL() (string, int, int, bool) { // reg[PC] = reg[HL]
+	opcode := fmt.Sprintf("JP HL")
+	cpu.Reg.Write(cpu.Reg.Read("HL"), "PC")
+	return opcode, 0, 4, true
 }
 
-func (s *CPU) JRN16() { // reg[PC] = reg[PC] + n16
-	addr := int(int8(s.Mem.Read(s.GetReg16Val("PC") + 1)))
-	s.JPN16(s.GetReg16Val("PC") + addr + 2)
-	s.SetClockTime(12, 3)
+func (cpu *CPU) JRN16() (string, int, int, bool) { // reg[PC] = reg[PC] + n16
+	opcode := fmt.Sprintf("JR $%x", int8(cpu.Mem.Read(cpu.Reg.Read("PC")+1)))
+	addr := int(int8(cpu.Mem.Read(cpu.Reg.Read("PC") + 1)))
+	cpu.JPN16(cpu.Reg.Read("PC") + addr + 2)
+	return opcode, 0, 12, true
 }
 
-func (s *CPU) JRCCN16(cc string) { // reg[PC] = reg[PC] + n16, if cc == true
-	if s.checkCC(cc) {
-		s.JRN16()
-	} else {
-		s.SetReg16Val("PC", s.GetReg16Val("PC")+2)
-		s.SetClockTime(8, 2)
+func (cpu *CPU) JRCCN16(cc string) (string, int, int, bool) { // reg[PC] = reg[PC] + n16, if cc == true
+	opcode := fmt.Sprintf("JR %s,$%x", cc, uint8(cpu.Mem.Read(cpu.Reg.Read("PC")+1)))
+	if cpu.checkCC(cc) {
+		cpu.JRN16()
+		return opcode, 0, 12, true
 	}
+	return opcode, 2, 8, true
 }
 
-func (s *CPU) RET() { //
-	s.POPR16("PC")
-	s.SetReg16Val("PC", s.GetReg16Val("PC")-1)
-	s.SetClockTime(16, 4)
+func (cpu *CPU) RET() (string, int, int, bool) { //
+	opcode := fmt.Sprintf("RET")
+	cpu.POPR16("PC")
+	return opcode, 0, 16, true
 }
 
-func (s *CPU) RETCC(cc string) { //
-	if s.checkCC(cc) {
-		s.RET()
-		s.SetClockTime(20, 5)
-	} else {
-		s.SetReg16Val("PC", s.GetReg16Val("PC")+1)
-		s.SetClockTime(8, 2)
+func (cpu *CPU) RETCC(cc string) (string, int, int, bool) { //
+	opcode := fmt.Sprintf("RET %s", cc)
+	if cpu.checkCC(cc) {
+		cpu.RET()
+		return opcode, 0, 20, true
 	}
+	return opcode, 1, 8, true
 }
 
-func (s *CPU) CALLN16(op int) { // Equivalent to following
-	s.PUSHN16(s.GetReg16Val("PC") + 3) // PUSH M[reg[PC+3]]
-	s.JPN16(op)                        // JP N16
-	s.SetClockTime(24, 6)
+func (cpu *CPU) RETI() (string, int, int, bool) { // Equivalent to:
+	opcode := fmt.Sprintf("RETI")
+	cpu.IME = true // EI
+	cpu.RET()      // RET
+	return opcode, 0, 16, true
 }
 
-func (s *CPU) CALLN8(op int) { // Equivalent to following
-	s.PUSHN16(s.GetReg16Val("PC")) // PUSH M[reg[PC]]
-	s.JPN16(op)                    // JP N16
+func (cpu *CPU) CALLN16() (string, int, int, bool) { // Equivalent to following
+	addr := cpu.Mem.Read(cpu.Reg.Read("PC")+1) + cpu.Mem.Read(cpu.Reg.Read("PC")+2)<<8
+	opcode := fmt.Sprintf("CALL $%x", addr)
+	cpu.PUSHN16(cpu.Reg.Read("PC") + 3) // PUSH M[reg[PC+3]]
+	cpu.JPN16(addr)                     // JP N16
+	return opcode, 0, 24, true
 }
 
-func (s *CPU) CALLCCN16(cc string, op int) { // CALLN16 if cc == true
-	if s.checkCC(cc) {
-		s.CALLN16(op)
-	} else {
-		s.SetReg16Val("PC", s.GetReg16Val("PC")+3)
-		s.SetClockTime(12, 3)
+func (cpu *CPU) CALLN8(op int) (string, int, int, bool) { // Equivalent to following
+	cpu.PUSHN16(cpu.Reg.Read("PC")) // PUSH M[reg[PC]]
+	cpu.JPN16(op)                   // JP N16
+	return "", 0, 0, true
+}
+
+func (cpu *CPU) CALLCCN16(cc string) (string, int, int, bool) { // CALLN16 if cc == true
+	addr := cpu.Mem.Read(cpu.Reg.Read("PC")+1) + cpu.Mem.Read(cpu.Reg.Read("PC")+2)<<8
+	opcode := fmt.Sprintf("CALL %s,$%x", cc, addr)
+	if cpu.checkCC(cc) {
+		cpu.CALLN16()
+		return opcode, 0, 24, true
 	}
+	return opcode, 3, 12, true
 }
 
-func (s *CPU) RETI() { // Equivalent to:
-	s.IME = true // EI
-	s.RET()      // RET
-}
-
-func (s *CPU) RST(vec string) {
+func (cpu *CPU) RST(vec string) (string, int, int, bool) {
+	opcode := fmt.Sprintf("RST %s", vec)
 	var vecAddr int
 	if vec == "00H" {
 		vecAddr = 0x0000
@@ -94,7 +107,7 @@ func (s *CPU) RST(vec string) {
 	} else if vec == "38H" {
 		vecAddr = 0x0038
 	}
-	s.PUSHN16(s.GetReg16Val("PC") + 1)
-	s.JPN16(vecAddr)
-	s.SetClockTime(16, 4)
+	cpu.PUSHN16(cpu.Reg.Read("PC") + 1)
+	cpu.JPN16(vecAddr)
+	return opcode, 0, 16, true
 }

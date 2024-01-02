@@ -7,40 +7,43 @@ import (
 )
 
 func main() {
-	d := Display.Init()
-	m := MMU.Init()
-	c := CPU.Init(m)
+	display := Display.Init()
+	mmu := MMU.Init()
+	cpu := CPU.Init(mmu)
 
-	defer d.Free()
+	defer display.Free()
 
-	// var exec bool
-	// exec = false
+	var exec bool
+	var length, time int
+	// var opcode string
+	exec = true
 
 	for 1 == 1 {
-		if !c.StopExec {
-			for c.TotalT < c.ClkRate/c.FrameRate {
-				// c.StateInfo()
-				c.ExecuteOpcode()
-				c.IncrTimer()
-				if c.StopExec {
+		if exec {
+			for cpu.TotalT < cpu.ClkRate/cpu.FrameRate {
+				// cpu.StateInfo()
+				_, length, time, exec = cpu.ExecuteOpcode()
+				cpu.IncrTimer(time)
+				cpu.IncrCounter(length)
+				// println(opcode)
+				if !exec {
 					break
 				}
-				c.LogSerialIO()
-				c.InterruptHandler()
-				c.IncrTimer()
+				cpu.LogSerialIO()
+				time, exec = cpu.InterruptHandler(exec)
+				cpu.IncrTimer(time)
 			}
-			c.TotalT = c.TotalT % (c.ClkRate / c.FrameRate)
+			cpu.TotalT = cpu.TotalT % (cpu.ClkRate / cpu.FrameRate)
 
 		} else {
-			// c.StateInfo()
-			c.LogSerialIO()
-			c.T = 4
-			c.IncrTimer()
-			c.InterruptHandler()
-			c.IncrTimer()
+			// cpu.StateInfo()
+			cpu.LogSerialIO()
+			cpu.IncrTimer(4)
+			time, exec = cpu.InterruptHandler(exec)
+			cpu.IncrTimer(time)
 
 		}
-		d.RenderFrame(c)
+		display.RenderFrame(cpu)
 	}
 
 }

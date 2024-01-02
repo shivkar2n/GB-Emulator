@@ -1,18 +1,18 @@
 package CPU
 
-func (s *CPU) GetIEBit(pos int) int { // Get interrupt enable
-	return (int(s.Mem.Read(0xFFFF)) >> pos) & 1
+func (cpu *CPU) GetIEBit(pos int) int { // Get interrupt enable
+	return (cpu.Mem.Read(0xFFFF) >> pos) & 1
 }
 
-func (s *CPU) GetIFBit(pos int) int { // Get interrupt flag
-	return (int(s.Mem.Read(0xFF0F)) >> pos) & 1
+func (cpu *CPU) GetIFBit(pos int) int { // Get interrupt flag
+	return (cpu.Mem.Read(0xFF0F) >> pos) & 1
 }
 
-func (s *CPU) SetIEBit(op int) { // Set interrupt enable bit
-	s.Mem.Write(int(s.Mem.Read(0xFFFF))|1<<op, 0xFFFF)
+func (cpu *CPU) SetIEBit(op int) { // Set interrupt enable bit
+	cpu.Mem.Write(cpu.Mem.Read(0xFFFF)|1<<op, 0xFFFF)
 }
 
-func (s *CPU) ResetIEBit(offset int) { // Reset interrupt enable bit
+func (cpu *CPU) ResetIEBit(offset int) { // Reset interrupt enable bit
 	k := 0
 	for i := 0; i < 8; i++ {
 		k = k << 1
@@ -20,14 +20,14 @@ func (s *CPU) ResetIEBit(offset int) { // Reset interrupt enable bit
 			k += 1
 		}
 	}
-	s.Mem.Write(int(s.Mem.Read(0xFFFF))&k, 0xFFFF)
+	cpu.Mem.Write(cpu.Mem.Read(0xFFFF)&k, 0xFFFF)
 }
 
-func (s *CPU) SetIFBit(op int) { // Set interrupt flag bit
-	s.Mem.Write(int(s.Mem.Read(0xFF0F))|1<<op, 0xFF0F)
+func (cpu *CPU) SetIFBit(op int) { // Set interrupt flag bit
+	cpu.Mem.Write(cpu.Mem.Read(0xFF0F)|1<<op, 0xFF0F)
 }
 
-func (s *CPU) ResetIFBit(offset int) { // Reset interrupt flag bit
+func (cpu *CPU) ResetIFBit(offset int) { // Reset interrupt flag bit
 	k := 0
 	for i := 0; i < 8; i++ {
 		k = k << 1
@@ -35,64 +35,49 @@ func (s *CPU) ResetIFBit(offset int) { // Reset interrupt flag bit
 			k += 1
 		}
 	}
-	s.Mem.Write(int(s.Mem.Read(0xFF0F))&k, 0xFF0F)
+	cpu.Mem.Write(cpu.Mem.Read(0xFF0F)&k, 0xFF0F)
 }
 
-func (s *CPU) InterruptHandler() {
-	if s.IME {
-		if s.GetIEBit(0) == 1 && s.GetIFBit(0) == 1 { // VBlank
-			s.IME = false
+func (cpu *CPU) InterruptHandler(exec bool) (int, bool) {
+	if cpu.IME {
+		if cpu.GetIEBit(0) == 1 && cpu.GetIFBit(0) == 1 { // VBlank
+			cpu.IME = false
 			// fmt.Printf("V-Blank Interrupt!\t")
-			s.CALLN8(0x40)
-			s.ResetIFBit(0)
-			s.SetClockTime(20, 5)
-			if s.StopExec {
-				s.StopExec = false
-			}
-
+			cpu.CALLN8(0x40)
+			cpu.ResetIFBit(0)
+			return 20, true
 		}
-		if s.GetIEBit(1) == 1 && s.GetIFBit(1) == 1 { // LCD STAT
-			s.IME = false
+		if cpu.GetIEBit(1) == 1 && cpu.GetIFBit(1) == 1 { // LCD STAT
+			cpu.IME = false
 			// fmt.Printf("LCD Interrupt!\n")
-			s.CALLN8(0x48)
-			s.ResetIFBit(1)
-			s.SetClockTime(20, 5)
-			if s.StopExec {
-				s.StopExec = false
-			}
+			cpu.CALLN8(0x48)
+			cpu.ResetIFBit(1)
+			return 20, true
 		}
-		if s.GetIEBit(2) == 1 && s.GetIFBit(2) == 1 { // Timer
-			s.IME = false
+		if cpu.GetIEBit(2) == 1 && cpu.GetIFBit(2) == 1 { // Timer
+			cpu.IME = false
 			// fmt.Printf("Timer Interrupt!\n")
-			s.CALLN8(0x50)
-			s.ResetIFBit(2)
-			s.SetClockTime(20, 5)
-			if s.StopExec {
-				s.StopExec = false
-			}
+			cpu.CALLN8(0x50)
+			cpu.ResetIFBit(2)
+			return 20, true
 		}
-		if s.GetIEBit(3) == 1 && s.GetIFBit(3) == 1 { // Serial
-			s.IME = false
+		if cpu.GetIEBit(3) == 1 && cpu.GetIFBit(3) == 1 { // Serial
+			cpu.IME = false
 			// fmt.Printf("Serial Interrupt!\t")
-			s.CALLN8(0x58)
-			s.ResetIFBit(3)
-			s.SetClockTime(20, 5)
-			if s.StopExec {
-				s.StopExec = false
-			}
+			cpu.CALLN8(0x58)
+			cpu.ResetIFBit(3)
+			return 20, true
 
 		}
-		if s.GetIEBit(4) == 1 && s.GetIFBit(4) == 1 { // Joypad
-			s.IME = false
+		if cpu.GetIEBit(4) == 1 && cpu.GetIFBit(4) == 1 { // Joypad
+			cpu.IME = false
 			// fmt.Printf("Joypad Interrupt!\t")
-			s.CALLN8(0x60)
-			s.ResetIFBit(4)
-			s.SetClockTime(20, 5)
-			if s.StopExec {
-				s.StopExec = false
-			}
+			cpu.CALLN8(0x60)
+			cpu.ResetIFBit(4)
+			return 20, true
 		}
-	} else if !s.IME && s.StopExec && (s.Mem.Read(0xFF0F)&s.Mem.Read(0xFFFF)) != 0 {
-		s.StopExec = false
+	} else if !cpu.IME && !exec && (cpu.Mem.Read(0xFF0F)&cpu.Mem.Read(0xFFFF)) != 0 {
+		return 0, true
 	}
+	return 0, exec
 }

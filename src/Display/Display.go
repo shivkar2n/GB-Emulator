@@ -55,7 +55,7 @@ func (d *Display) RenderFrame(c *CPU.CPU) {
 		// STAT interrupt if ly==lyc
 		if (c.Mem.Read(0xFF41)>>6)&1 == 1 && int(c.Mem.Read(0xFF45)) == ly {
 			c.SetIFBit(1)
-			c.InterruptHandler()
+			// c.InterruptHandler()
 		}
 
 		// Load object buffer (OAM Scan - Mode 2)
