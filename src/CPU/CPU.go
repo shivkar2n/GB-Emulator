@@ -247,6 +247,6 @@ func (cpu *CPU) LogSerialIO() {
 	}
 }
 
-func (cpu *CPU) IncrCounter(val int) {
+func (cpu *CPU) IncrementCounter(val int) {
 	cpu.Reg.Write(cpu.Reg.Read("PC")+val, "PC")
 }

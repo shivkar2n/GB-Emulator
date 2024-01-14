@@ -13,7 +13,7 @@ var bitPos = map[int]int{
 	3: 7,
 }
 
-func (cpu *CPU) IncrTimer(t int) {
+func (cpu *CPU) IncrementTimer(t int) {
 	cpu.TotalT += t
 
 	for i := 0; i < t; i++ {

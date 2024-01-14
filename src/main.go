@@ -23,24 +23,24 @@ func main() {
 			for cpu.TotalT < cpu.ClkRate/cpu.FrameRate {
 				// cpu.StateInfo()
 				_, length, time, exec = cpu.ExecuteOpcode()
-				cpu.IncrTimer(time)
-				cpu.IncrCounter(length)
+				cpu.IncrementTimer(time)
+				cpu.IncrementCounter(length)
 				// println(opcode)
 				if !exec {
 					break
 				}
 				cpu.LogSerialIO()
 				time, exec = cpu.InterruptHandler(exec)
-				cpu.IncrTimer(time)
+				cpu.IncrementTimer(time)
 			}
 			cpu.TotalT = cpu.TotalT % (cpu.ClkRate / cpu.FrameRate)
 
 		} else {
 			// cpu.StateInfo()
 			cpu.LogSerialIO()
-			cpu.IncrTimer(4)
+			cpu.IncrementTimer(4)
 			time, exec = cpu.InterruptHandler(exec)
-			cpu.IncrTimer(time)
+			cpu.IncrementTimer(time)
 
 		}
 		display.RenderFrame(cpu)
