@@ -14,7 +14,7 @@ type MMU struct {
 	bitMask      int
 }
 
-func Init() MMU { // Load ROM
+func Init() *MMU { // Load ROM
 	rom, _ := os.ReadFile(os.Args[1])
 	mask := 0
 	for i := 0; i < len(rom)/32768; i++ {
@@ -22,7 +22,7 @@ func Init() MMU { // Load ROM
 		mask = mask | 1
 	}
 
-	m := MMU{
+	m := &MMU{
 		Rom:      rom,
 		ramBank:  0,
 		romBank:  1,
@@ -31,7 +31,7 @@ func Init() MMU { // Load ROM
 		highBank: 0,
 		bitMask:  mask,
 	}
-	copy(m.Ram[:],rom)
+	copy(m.Ram[:], rom)
 
 	// Nintendo Boot logo
 	// logo := []byte{0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
