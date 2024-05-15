@@ -618,7 +618,7 @@ func (GB *GB) LDHLN8() (string, int, int, bool) { // M[HL] = n8
 func (GB *GB) LDR8HL(reg string) (string, int, int, bool) { // reg[] = M[HL]
 	opcode := fmt.Sprintf("LD %s,(HL)", reg)
 	GB.CPU.Reg.Write(GB.GetHLVal(), reg)
-	return opcode, 1, 12, true
+	return opcode, 1, 8, true
 }
 
 func (GB *GB) LDR16A(reg string) (string, int, int, bool) { // M[reg] = reg[A]

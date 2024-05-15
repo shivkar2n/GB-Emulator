@@ -4,7 +4,7 @@ type CPU struct {
 	Reg                   Register
 	Sysclk, TotalT, Level int
 	IME                   bool
-	ClkRate, FrameRate    int
+	ClkRate               int
 }
 
 type Register struct {
@@ -127,7 +127,6 @@ func Init() *CPU {
 		Sysclk:    0xABCC,
 		Level:     0,
 		ClkRate:   4194304,
-		FrameRate: 60,
 	}
 	return &cpu
 }

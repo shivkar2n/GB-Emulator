@@ -20,6 +20,7 @@ const (
 	OBJECT_BUFFER_SIZE = 10
 	BG_QUEUE_SIZE      = 8
 	LCD_CTRL           = 0xFF40
+	LCD_STAT           = 0xFF41
 	WX                 = 0xFF4B
 	WY                 = 0xFF4A
 	SCX                = 0xFF43
@@ -62,6 +63,8 @@ type PPU struct {
 	CurrentPositionX    int // Internal-X-Pos-Counter
 	WindowMode          bool
 	IsBackgroundTile    bool
+	Frame               int
+	FrameRate           int
 }
 
 func Init(CPU *CPU.CPU, MMU *MMU.MMU) *PPU {
@@ -78,11 +81,13 @@ func Init(CPU *CPU.CPU, MMU *MMU.MMU) *PPU {
 	}
 
 	return &PPU{
-		Window:   Window,
-		Renderer: Renderer,
-		Pixels:   Pixels,
-		CPU:      CPU,
-		MMU:      MMU,
+		Window:    Window,
+		Renderer:  Renderer,
+		Pixels:    Pixels,
+		CPU:       CPU,
+		MMU:       MMU,
+		Frame:     0,
+		FrameRate: 60,
 	}
 }
 
@@ -95,6 +100,21 @@ func (PPU *PPU) ResetScanline() {
 	PPU.CurrentPositionX = 0
 	PPU.WindowMode = false
 	PPU.IsBackgroundTile = true
+}
+
+func (PPU *PPU) SetPPUMode(mode string) {
+	if mode == "HBLANK" {
+		PPU.MMU.Write((PPU.MMU.Read(LCD_STAT) & 0xFC), LCD_STAT)
+
+	} else if mode == "VBLANK" {
+		PPU.MMU.Write((PPU.MMU.Read(LCD_STAT)&0xFC)|0x1, LCD_STAT)
+
+	} else if mode == "OAM" {
+		PPU.MMU.Write((PPU.MMU.Read(LCD_STAT)&0xFC)|0x2, LCD_STAT)
+
+	} else if mode == "DRAWING" {
+		PPU.MMU.Write((PPU.MMU.Read(LCD_STAT)&0xFC)|0x3, LCD_STAT)
+	}
 }
 
 func (PPU *PPU) FetchBackgroundTile() int {
@@ -140,6 +160,7 @@ func (PPU *PPU) ObjectColor(id int, objectFlag int) int {
 }
 
 func (PPU *PPU) LoadObjectBuffer() {
+	PPU.SetPPUMode("OAM")
 	for addr := 0xFE00; addr < 0xFEA0; addr += 4 {
 		spriteX := PPU.MMU.Read(addr + 1)
 		spriteY := PPU.MMU.Read(addr)
@@ -159,7 +180,6 @@ func (PPU *PPU) LoadObjectBuffer() {
 		return PPU.ObjectBuffer[i].PositionX >= PPU.ObjectBuffer[j].PositionX
 	})
 }
-
 
 func (PPU *PPU) IncrementCounter() {
 	if !PPU.IsBackgroundTile { // Increment once when Window Pixels pushed to LCD for scanline
@@ -270,11 +290,13 @@ func (PPU *PPU) PushPixelToLCD(backgroundQueue []int) {
 }
 
 func (PPU *PPU) DrawScanline() {
+	PPU.SetPPUMode("DRAWING")
 	for PPU.CurrentPositionX < NO_PIXEL_WIDTH {
 		tileAddr := PPU.FetchBackgroundTile()
 		backgroundQueue := PPU.PushBackgroundPixelRow(tileAddr)
 		PPU.PushPixelToLCD(backgroundQueue)
 	}
+	PPU.SetPPUMode("HBLANK")
 }
 
 func (PPU *PPU) Free() {

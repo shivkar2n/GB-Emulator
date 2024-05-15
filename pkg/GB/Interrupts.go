@@ -1,5 +1,7 @@
 package GB
 
+// import "fmt"
+
 func (GB *GB) GetIEBit(pos int) int { // Get interrupt enable
 	return (GB.MMU.Read(0xFFFF) >> pos) & 1
 }
@@ -38,7 +40,7 @@ func (GB *GB) ResetIFBit(offset int) { // Reset interrupt flag bit
 	GB.MMU.Write(GB.MMU.Read(0xFF0F)&k, 0xFF0F)
 }
 
-func (GB *GB) InterruptHandler(exec bool) (int, bool) {
+func (GB *GB) InterruptHandler(awake bool) (int, bool) {
 	if GB.CPU.IME {
 		if GB.GetIEBit(0) == 1 && GB.GetIFBit(0) == 1 { // VBlank
 			GB.CPU.IME = false
@@ -76,8 +78,8 @@ func (GB *GB) InterruptHandler(exec bool) (int, bool) {
 			GB.ResetIFBit(4)
 			return 20, true
 		}
-	} else if !GB.CPU.IME && !exec && (GB.MMU.Read(0xFF0F)&GB.MMU.Read(0xFFFF)) != 0 {
+	} else if !GB.CPU.IME && !awake && (GB.MMU.Read(0xFF0F)&GB.MMU.Read(0xFFFF)) != 0 {
 		return 0, true
 	}
-	return 0, exec
+	return 0, awake
 }
