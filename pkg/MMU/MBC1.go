@@ -1,11 +1,20 @@
 package MMU
 
 func (m *MMU) Read(addr int) int {
+	if addr == 0xFF01 {
+		return int(0xFF)
+	}
+
 	return int(m.Ram[addr])
 }
 
 func (m *MMU) Write(val int, addr int) {
-	m.Ram[addr] = byte(val)
+	if addr == 0xFF00 && val == 0x30 {
+		m.Ram[addr] = byte(0x3F)
+
+	} else {
+		m.Ram[addr] = byte(val)
+	}
 }
 
 // func (m *MMU) Read(addr int) int {
@@ -35,12 +44,12 @@ func (m *MMU) Write(val int, addr int) {
 // 		return int(m.Ram[addr])
 
 // 	} else if addr >= 0xFEA0 && addr <= 0xFEFF {
-// 		return 0 
+// 		return 0
 
 // 	} else if addr >= 0xFF00 && addr <= 0xFFFF {
 // 		return int(m.Ram[addr])
-// 	} 
- 
+// 	}
+
 // 	return 0
 // }
 

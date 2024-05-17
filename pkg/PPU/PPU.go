@@ -64,7 +64,6 @@ type PPU struct {
 	WindowMode          bool
 	IsBackgroundTile    bool
 	Frame               int
-	FrameRate           int
 }
 
 func Init(CPU *CPU.CPU, MMU *MMU.MMU) *PPU {
@@ -81,13 +80,12 @@ func Init(CPU *CPU.CPU, MMU *MMU.MMU) *PPU {
 	}
 
 	return &PPU{
-		Window:    Window,
-		Renderer:  Renderer,
-		Pixels:    Pixels,
-		CPU:       CPU,
-		MMU:       MMU,
-		Frame:     0,
-		FrameRate: 60,
+		Window:   Window,
+		Renderer: Renderer,
+		Pixels:   Pixels,
+		CPU:      CPU,
+		MMU:      MMU,
+		Frame:    0,
 	}
 }
 

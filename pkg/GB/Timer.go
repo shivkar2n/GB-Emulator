@@ -13,10 +13,10 @@ var bitPos = map[int]int{
 	3: 7,
 }
 
-func (GB *GB) IncrementTimer() {
-	GB.CPU.TotalT += GB.TCycles
+func (GB *GB) IncrementTimer(cycles int) {
+	GB.CPU.TotalCycles += cycles
 
-	for i := 0; i < GB.TCycles; i++ {
+	for i := 0; i < cycles; i++ {
 		GB.CPU.Sysclk = (GB.CPU.Sysclk + 1) & 0xFFFF
 		GB.MMU.Write(GB.CPU.Sysclk&0xFF, 0xFF04)
 		timerEnable := (GB.MMU.Read(0xFF07) >> 2) & 1

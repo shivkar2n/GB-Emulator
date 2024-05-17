@@ -2,16 +2,21 @@ package GB
 
 // import "fmt"
 
+const (
+	IE = 0xFFFF
+	IF = 0xFF0F
+)
+
 func (GB *GB) GetIEBit(pos int) int { // Get interrupt enable
-	return (GB.MMU.Read(0xFFFF) >> pos) & 1
+	return (GB.MMU.Read(IE) >> pos) & 1
 }
 
 func (GB *GB) GetIFBit(pos int) int { // Get interrupt flag
-	return (GB.MMU.Read(0xFF0F) >> pos) & 1
+	return (GB.MMU.Read(IF) >> pos) & 1
 }
 
 func (GB *GB) SetIEBit(op int) { // Set interrupt enable bit
-	GB.MMU.Write(GB.MMU.Read(0xFFFF)|1<<op, 0xFFFF)
+	GB.MMU.Write(GB.MMU.Read(IE)|1<<op, IE)
 }
 
 func (GB *GB) ResetIEBit(offset int) { // Reset interrupt enable bit
@@ -22,11 +27,11 @@ func (GB *GB) ResetIEBit(offset int) { // Reset interrupt enable bit
 			k += 1
 		}
 	}
-	GB.MMU.Write(GB.MMU.Read(0xFFFF)&k, 0xFFFF)
+	GB.MMU.Write(GB.MMU.Read(IE)&k, IE)
 }
 
 func (GB *GB) SetIFBit(op int) { // Set interrupt flag bit
-	GB.MMU.Write(GB.MMU.Read(0xFF0F)|1<<op, 0xFF0F)
+	GB.MMU.Write(GB.MMU.Read(IF)|1<<op, IF)
 }
 
 func (GB *GB) ResetIFBit(offset int) { // Reset interrupt flag bit
@@ -37,7 +42,7 @@ func (GB *GB) ResetIFBit(offset int) { // Reset interrupt flag bit
 			k += 1
 		}
 	}
-	GB.MMU.Write(GB.MMU.Read(0xFF0F)&k, 0xFF0F)
+	GB.MMU.Write(GB.MMU.Read(IF)&k, IF)
 }
 
 func (GB *GB) InterruptHandler(awake bool) (int, bool) {
@@ -78,7 +83,7 @@ func (GB *GB) InterruptHandler(awake bool) (int, bool) {
 			GB.ResetIFBit(4)
 			return 20, true
 		}
-	} else if !GB.CPU.IME && !awake && (GB.MMU.Read(0xFF0F)&GB.MMU.Read(0xFFFF)) != 0 {
+	} else if !GB.CPU.IME && !awake && (GB.MMU.Read(IF)&GB.MMU.Read(IE)) != 0 {
 		return 0, true
 	}
 	return 0, awake

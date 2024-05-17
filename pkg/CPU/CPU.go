@@ -1,10 +1,9 @@
 package CPU
 
 type CPU struct {
-	Reg                   Register
-	Sysclk, TotalT, Level int
-	IME                   bool
-	ClkRate               int
+	Reg                        Register
+	Sysclk, TotalCycles, Level int
+	IME                        bool
 }
 
 type Register struct {
@@ -121,12 +120,10 @@ func (r *Register) Write(val int, name string) {
 
 func Init() *CPU {
 	cpu := CPU{
-		Reg:       InitRegister(),
-		IME:       false,
-		TotalT:    0,
-		Sysclk:    0xABCC,
-		Level:     0,
-		ClkRate:   4194304,
+		Reg:    InitRegister(),
+		IME:    false,
+		Sysclk: 0xABCC,
+		Level:  0,
 	}
 	return &cpu
 }

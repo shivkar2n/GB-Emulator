@@ -38,17 +38,7 @@ func (GB *GB) StatInterrupt() {
 
 	if condition {
 		GB.SetIFBit(1)
-		GB.InterruptHandler(true)
-		for !GB.CPU.IME { // Execute until master flag re-enabled
-			_, GB.Length, GB.TCycles, _ = GB.ExecuteOpcode()
-			GB.IncrementTimer()
-			GB.CPU.IncrementCounter(GB.Length)
-		}
 	}
-}
-
-func (GB *GB) VBlankInterrupt() {
-	GB.SetIFBit(0)
 }
 
 func (GB *GB) RenderScanline() {
@@ -63,20 +53,23 @@ func (GB *GB) RenderScanline() {
 		// VBLANK MODE
 	} else if NO_REAL_SCANLINES <= GB.PPU.BackgroundPositionY && GB.PPU.BackgroundPositionY < NO_SCANLINES {
 		GB.PPU.IncrementCounter()
-		GB.VBlankInterrupt()
+		GB.SetIFBit(0) // Set V-Blank interrupt
 
 	} else {
-		GB.PPU.Frame++
+		// Reset PPU Values
 		GB.MMU.Write(0xFF44, 0)
 		GB.PPU.BackgroundPositionY = 0
 		GB.PPU.WindowPositionY = 0
 		GB.PPU.ObjectPositionY = -1
+
+		// Render frame once all scanlines are drawn
+		GB.PPU.Frame++
+		GB.PPU.Renderer.Present()
 	}
 }
 
-func (GB *GB) RenderFrame() {
-	// Render drawn frame
-	GB.PPU.Frame = GB.PPU.Frame % GB.PPU.FrameRate
+func (GB *GB) FrameDelay() {
+	// Delay between frame
+	GB.PPU.Frame = GB.PPU.Frame % FRAME_RATE
 	sdl.Delay(0)
-	GB.PPU.Renderer.Present()
 }

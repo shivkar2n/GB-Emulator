@@ -8,12 +8,15 @@ import (
 	"github.com/shivkar2n/GB-Emulator/pkg/PPU"
 )
 
+const (
+	FRAME_RATE     = 60
+	CPU_CLOCK_RATE = 4194304
+)
+
 type GB struct {
-	AwakeMode       bool
-	Length, TCycles int
-	CPU             *CPU.CPU
-	MMU             *MMU.MMU
-	PPU             *PPU.PPU
+	CPU *CPU.CPU
+	MMU *MMU.MMU
+	PPU *PPU.PPU
 }
 
 func Init() *GB {
@@ -22,12 +25,9 @@ func Init() *GB {
 	ppu := PPU.Init(cpu, mmu)
 
 	return &GB{
-		AwakeMode: true,
-		Length:    0,
-		TCycles:   0,
-		CPU:       cpu,
-		MMU:       mmu,
-		PPU:       ppu,
+		CPU: cpu,
+		MMU: mmu,
+		PPU: ppu,
 	}
 }
 
@@ -69,47 +69,45 @@ func (GB *GB) StateInfo(opcode string) { // Get info about state of Console
 	pcMem2 := GB.MMU.Read(GB.CPU.Reg.Read("PC") + 2)
 	pcMem3 := GB.MMU.Read(GB.CPU.Reg.Read("PC") + 3)
 	ly := GB.MMU.Read(0xFF44)
-	cdn := GB.MMU.Read(0xFFA6)
+	iE := GB.MMU.Read(IE)
+	iF := GB.MMU.Read(IF)
+	// cdn := GB.MMU.Read(0xFFA6)
 
 	// fmt.Printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
-	fmt.Printf("A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X LY:%02X COUNTDOWN: %02X %s\n", a, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3, ly, cdn, opcode)
+	fmt.Printf("A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X LY:%02X IF:%02X IE:%02X %s\n", a, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3, ly, iE, iF, opcode)
 	// fmt.Printf("A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X, PC:%04X PCMEM:%02X,%02X,%02X,%02X %s", a, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3, opcode)
 	// fmt.Printf(" FLAGS: Z:%d H:%d C:%d N:%d\n", GB.CPU.GetFlag("Z"), GB.CPU.GetFlag("H"), GB.CPU.GetFlag("C"), GB.CPU.GetFlag("N"))
 	// fmt.Printf("%d %s\n", ly, opcode)
 }
 
 func (GB *GB) Run() {
+	GB.MMU.Write(0x3F, JOYP)
+	awake := true
 	for 1 == 1 {
-		if GB.PPU.Frame < 60 {
-			if GB.AwakeMode {
-				for GB.CPU.TotalT < GB.CPU.ClkRate/(GB.PPU.FrameRate*NO_REAL_SCANLINES) {
-					// var opcode string
-					_, GB.Length, GB.TCycles, GB.AwakeMode = GB.ExecuteOpcode()
+		if GB.PPU.Frame < FRAME_RATE {
+			cycles := 0
+			length := 0
+			// opcode := ""
+			for GB.CPU.TotalCycles < CPU_CLOCK_RATE/(FRAME_RATE*NO_REAL_SCANLINES) {
+				if awake {
+					_, length, cycles, awake = GB.ExecuteOpcode()
 					// GB.StateInfo(opcode)
-					GB.IncrementTimer()
-					GB.CPU.IncrementCounter(GB.Length)
-					if !GB.AwakeMode {
-						break
-					}
-					// GB.LogSerialIO()
-					GB.TCycles, GB.AwakeMode = GB.InterruptHandler(GB.AwakeMode)
-					GB.IncrementTimer()
+					GB.IncrementTimer(cycles)
+					GB.CPU.IncrementCounter(length)
+
+				} else { // Stall CPU until it recieves interrupt (Sleep mode)
+					GB.IncrementTimer(4)
 				}
-				GB.CPU.TotalT = GB.CPU.TotalT % (GB.CPU.ClkRate / (GB.PPU.FrameRate * NO_REAL_SCANLINES))
-
-			} else { // Stall CPU until it recieves interrupt (Sleep mode)
-				// GB.StateInfo("SLEEP MODE!!")
-				// GB.LogSerialIO()
-				GB.TCycles = 4
-				GB.IncrementTimer()
-				GB.TCycles, GB.AwakeMode = GB.InterruptHandler(GB.AwakeMode)
-				GB.IncrementTimer()
-
+				cycles, awake = GB.InterruptHandler(awake)
+				GB.IncrementTimer(cycles)
 			}
+			GB.CPU.TotalCycles = GB.CPU.TotalCycles % (CPU_CLOCK_RATE / (FRAME_RATE * NO_REAL_SCANLINES))
+			GB.LogSerialIO()
+			GB.PollJoyPadPress()
 			GB.RenderScanline()
 
 		} else {
-			GB.RenderFrame()
+			GB.FrameDelay()
 		}
 	}
 

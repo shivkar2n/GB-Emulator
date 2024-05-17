@@ -2,6 +2,10 @@ package MMU
 
 import "os"
 
+const (
+	JOYP = 0xFF00
+)
+
 type MMU struct {
 	Ram          [65536]byte
 	Rom          []byte
