@@ -4,6 +4,7 @@ import "os"
 
 const (
 	JOYP = 0xFF00
+	DMA = 0xFF46
 )
 
 type MMU struct {

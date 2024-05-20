@@ -9,8 +9,14 @@ func (m *MMU) Read(addr int) int {
 }
 
 func (m *MMU) Write(val int, addr int) {
-	if addr == 0xFF00 && val == 0x30 {
+	if addr == JOYP && val == 0x30 {
 		m.Ram[addr] = byte(0x3F)
+
+	} else if addr == DMA { // OAM DMA Transfer
+		start := (val << 8)
+		for oamAddr, srcAddr := 0xFE00, start; oamAddr < 0xFEA0; oamAddr, srcAddr = oamAddr+1, srcAddr+1 {
+			m.Ram[oamAddr] = m.Ram[srcAddr]
+		}
 
 	} else {
 		m.Ram[addr] = byte(val)

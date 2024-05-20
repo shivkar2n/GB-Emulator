@@ -13,7 +13,6 @@ const (
 )
 
 func (GB *GB) PressDpad(direction string) {
-	GB.MMU.Write(GB.MMU.Read(JOYP)&0x2F, JOYP)
 	if direction == "RIGHT" {
 		GB.MMU.Write(GB.MMU.Read(JOYP)&0xFE, JOYP)
 
@@ -30,7 +29,6 @@ func (GB *GB) PressDpad(direction string) {
 }
 
 func (GB *GB) PressButton(button string) {
-	GB.MMU.Write(GB.MMU.Read(JOYP)&0x1F, JOYP)
 	if button == "A" {
 		GB.MMU.Write(GB.MMU.Read(JOYP)&0xFE, JOYP)
 
