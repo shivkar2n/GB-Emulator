@@ -4,7 +4,9 @@ import "os"
 
 const (
 	JOYP = 0xFF00
-	DMA = 0xFF46
+	DMA  = 0xFF46
+	IE   = 0xFFFF
+	IF   = 0xFF0F
 )
 
 type MMU struct {
@@ -17,6 +19,8 @@ type MMU struct {
 	zeroBank     int
 	highBank     int
 	bitMask      int
+	ButtonState  byte
+	DpadState    byte
 }
 
 func Init() *MMU { // Load ROM
@@ -28,13 +32,15 @@ func Init() *MMU { // Load ROM
 	}
 
 	m := &MMU{
-		Rom:      rom,
-		ramBank:  0,
-		romBank:  1,
-		mode:     false,
-		zeroBank: 0,
-		highBank: 0,
-		bitMask:  mask,
+		Rom:         rom,
+		ramBank:     0,
+		romBank:     1,
+		mode:        false,
+		zeroBank:    0,
+		highBank:    0,
+		bitMask:     mask,
+		ButtonState: 0xF,
+		DpadState:   0xF,
 	}
 	copy(m.Ram[:], rom)
 

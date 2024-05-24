@@ -65,6 +65,7 @@ func (GB *GB) RenderScanline() {
 		// Render frame once all scanlines are drawn
 		GB.PPU.Frame++
 		GB.PPU.Renderer.Present()
+		GB.MMU.PollJoyPadPress()
 	}
 }
 

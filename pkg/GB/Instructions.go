@@ -912,7 +912,7 @@ func (GB *GB) DI() (string, int, int, bool) {
 
 func (GB *GB) CPL() (string, int, int, bool) { // Reg[A] = ~Reg[A]
 	opcode := fmt.Sprintf("CPL")
-	GB.CPU.Reg.Write(GB.CPU.Reg.Read("A"), "A")
+	GB.CPU.Reg.Write(^GB.CPU.Reg.Read("A"), "A")
 	GB.CPU.SetFlag("N")
 	GB.CPU.SetFlag("H")
 	return opcode, 1, 4, true

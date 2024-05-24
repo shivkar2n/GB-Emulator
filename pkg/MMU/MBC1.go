@@ -1,25 +1,36 @@
 package MMU
 
-func (m *MMU) Read(addr int) int {
-	if addr == 0xFF01 {
+func (MMU *MMU) Read(addr int) int {
+	if addr == 0xFF01 { // Stub for serial COMS
 		return int(0xFF)
 	}
-
-	return int(m.Ram[addr])
+	return int(MMU.Ram[addr])
 }
 
-func (m *MMU) Write(val int, addr int) {
-	if addr == JOYP && val == 0x30 {
-		m.Ram[addr] = byte(0x3F)
+func (MMU *MMU) Write(val int, addr int) {
+	if addr == JOYP {
+		if val == 0x30 {
+			MMU.Ram[addr] = byte(0xFF)
+
+		} else if val == 0x20 { // Select dpad
+			MMU.Ram[addr] = (MMU.Ram[addr] & 0xF0) | MMU.DpadState
+
+		} else if val == 0x10 { // Select buttons
+			MMU.Ram[addr] = (MMU.Ram[addr] & 0xF0) | MMU.ButtonState
+		} else {
+			MMU.Ram[addr] = (MMU.Ram[addr] & 0xF0) | MMU.ButtonState
+			MMU.Ram[addr] = (MMU.Ram[addr] & 0xF0) | MMU.DpadState
+
+		}
 
 	} else if addr == DMA { // OAM DMA Transfer
 		start := (val << 8)
 		for oamAddr, srcAddr := 0xFE00, start; oamAddr < 0xFEA0; oamAddr, srcAddr = oamAddr+1, srcAddr+1 {
-			m.Ram[oamAddr] = m.Ram[srcAddr]
+			MMU.Ram[oamAddr] = MMU.Ram[srcAddr]
 		}
 
 	} else {
-		m.Ram[addr] = byte(val)
+		MMU.Ram[addr] = byte(val)
 	}
 }
 

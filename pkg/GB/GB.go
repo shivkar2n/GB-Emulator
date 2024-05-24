@@ -9,6 +9,7 @@ import (
 )
 
 const (
+	JOYP           = 0xFF00
 	FRAME_RATE     = 60
 	CPU_CLOCK_RATE = 4194304
 )
@@ -73,22 +74,18 @@ func (GB *GB) StateInfo(opcode string) { // Get info about state of Console
 	iF := GB.MMU.Read(IF)
 	// cdn := GB.MMU.Read(0xFFA6)
 
-	// fmt.Printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
 	fmt.Printf("A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X LY:%02X IF:%02X IE:%02X %s\n", a, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3, ly, iE, iF, opcode)
-	// fmt.Printf("A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X, PC:%04X PCMEM:%02X,%02X,%02X,%02X %s", a, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3, opcode)
-	// fmt.Printf(" FLAGS: Z:%d H:%d C:%d N:%d\n", GB.CPU.GetFlag("Z"), GB.CPU.GetFlag("H"), GB.CPU.GetFlag("C"), GB.CPU.GetFlag("N"))
-	// fmt.Printf("%d %s\n", ly, opcode)
 }
 
 func (GB *GB) Run() {
-	GB.MMU.Write(0x3F, JOYP)
+	GB.MMU.Ram[JOYP] = byte(0xFF)
 	awake := true
 	for 1 == 1 {
 		if GB.PPU.Frame < FRAME_RATE {
 			cycles := 0
 			length := 0
 			// opcode := ""
-			for GB.CPU.TotalCycles < CPU_CLOCK_RATE/(FRAME_RATE*NO_REAL_SCANLINES) {
+			for GB.CPU.TotalCycles < CPU_CLOCK_RATE/(FRAME_RATE*NO_SCANLINES) {
 				if awake {
 					_, length, cycles, awake = GB.ExecuteOpcode()
 					// GB.StateInfo(opcode)
@@ -98,12 +95,12 @@ func (GB *GB) Run() {
 				} else { // Stall CPU until it recieves interrupt (Sleep mode)
 					GB.IncrementTimer(4)
 				}
+				// fmt.Printf("%02X %02X %02X\n", GB.MMU.Ram[JOYP], GB.MMU.ButtonState, GB.MMU.DpadState)
 				cycles, awake = GB.InterruptHandler(awake)
 				GB.IncrementTimer(cycles)
 			}
-			GB.CPU.TotalCycles = GB.CPU.TotalCycles % (CPU_CLOCK_RATE / (FRAME_RATE * NO_REAL_SCANLINES))
+			GB.CPU.TotalCycles = GB.CPU.TotalCycles % (CPU_CLOCK_RATE / (FRAME_RATE * NO_SCANLINES))
 			GB.LogSerialIO()
-			GB.PollJoyPadPress()
 			GB.RenderScanline()
 
 		} else {
