@@ -3,10 +3,11 @@ package MMU
 import "os"
 
 const (
-	JOYP = 0xFF00
-	DMA  = 0xFF46
-	IE   = 0xFFFF
-	IF   = 0xFF0F
+	JOYP   = 0xFF00
+	SERIAL = 0xFF01
+	DMA    = 0xFF46
+	IE     = 0xFFFF
+	IF     = 0xFF0F
 )
 
 type MMU struct {

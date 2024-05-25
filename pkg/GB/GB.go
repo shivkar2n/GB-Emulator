@@ -10,6 +10,8 @@ import (
 
 const (
 	JOYP           = 0xFF00
+	SERIAL         = 0xFF01
+	SC             = 0xFF02
 	FRAME_RATE     = 60
 	CPU_CLOCK_RATE = 4194304
 )
@@ -49,14 +51,15 @@ func (GB *GB) SetPCVal(val int) { // Set value pointed by PC register
 }
 
 func (GB *GB) LogSerialIO() {
-	if GB.MMU.Read(0xFF02) == 0x81 {
-		fmt.Printf("%c", GB.MMU.Read(0xFF01))
-		GB.MMU.Write(0x00, 0xFF02)
+	if GB.MMU.Read(SC) == 0x81 {
+		fmt.Printf("%c", GB.MMU.Read(SERIAL))
+		GB.MMU.Write(0x00, SC)
 	}
 }
 
 func (GB *GB) StateInfo(opcode string) { // Get info about state of Console
 	a := GB.CPU.Reg.Read("A")
+	f := GB.CPU.Reg.Read("F")
 	b := GB.CPU.Reg.Read("B")
 	c := GB.CPU.Reg.Read("C")
 	d := GB.CPU.Reg.Read("D")
@@ -69,12 +72,13 @@ func (GB *GB) StateInfo(opcode string) { // Get info about state of Console
 	pcMem1 := GB.MMU.Read(GB.CPU.Reg.Read("PC") + 1)
 	pcMem2 := GB.MMU.Read(GB.CPU.Reg.Read("PC") + 2)
 	pcMem3 := GB.MMU.Read(GB.CPU.Reg.Read("PC") + 3)
-	ly := GB.MMU.Read(0xFF44)
-	iE := GB.MMU.Read(IE)
-	iF := GB.MMU.Read(IF)
+	// ly := GB.MMU.Read(0xFF44)
+	// iE := GB.MMU.Read(IE)
+	// iF := GB.MMU.Read(IF)
 	// cdn := GB.MMU.Read(0xFFA6)
 
-	fmt.Printf("A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X LY:%02X IF:%02X IE:%02X %s\n", a, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3, ly, iE, iF, opcode)
+	// fmt.Printf("A:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X LY:%02X IF:%02X IE:%02X %s\n", a, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3, ly, iE, iF, opcode) fmt.Printf("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
+	fmt.Printf("A:%02X F:%02X B:%02X C:%02X D:%02X E:%02X H:%02X L:%02X SP:%04X PC:%04X PCMEM:%02X,%02X,%02X,%02X\n", a, f, b, c, d, e, h, l, sp, pc, pcMem, pcMem1, pcMem2, pcMem3)
 }
 
 func (GB *GB) Run() {
@@ -95,7 +99,6 @@ func (GB *GB) Run() {
 				} else { // Stall CPU until it recieves interrupt (Sleep mode)
 					GB.IncrementTimer(4)
 				}
-				// fmt.Printf("%02X %02X %02X\n", GB.MMU.Ram[JOYP], GB.MMU.ButtonState, GB.MMU.DpadState)
 				cycles, awake = GB.InterruptHandler(awake)
 				GB.IncrementTimer(cycles)
 			}

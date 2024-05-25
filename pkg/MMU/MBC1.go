@@ -1,7 +1,7 @@
 package MMU
 
 func (MMU *MMU) Read(addr int) int {
-	if addr == 0xFF01 { // Stub for serial COMS
+	if addr == SERIAL { // Stub for serial COMS
 		return int(0xFF)
 	}
 	return int(MMU.Ram[addr])
@@ -28,6 +28,8 @@ func (MMU *MMU) Write(val int, addr int) {
 		for oamAddr, srcAddr := 0xFE00, start; oamAddr < 0xFEA0; oamAddr, srcAddr = oamAddr+1, srcAddr+1 {
 			MMU.Ram[oamAddr] = MMU.Ram[srcAddr]
 		}
+
+	} else if 0x0000 <= addr && addr <= 0x3FFF {
 
 	} else {
 		MMU.Ram[addr] = byte(val)

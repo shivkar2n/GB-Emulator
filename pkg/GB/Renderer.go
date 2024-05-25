@@ -51,9 +51,13 @@ func (GB *GB) RenderScanline() {
 		GB.StatInterrupt()
 
 		// VBLANK MODE
-	} else if NO_REAL_SCANLINES <= GB.PPU.BackgroundPositionY && GB.PPU.BackgroundPositionY < NO_SCANLINES {
-		GB.PPU.IncrementCounter()
+	} else if GB.PPU.BackgroundPositionY == NO_REAL_SCANLINES {
 		GB.SetIFBit(0) // Set V-Blank interrupt
+		GB.PPU.IncrementCounter()
+
+	} else if NO_REAL_SCANLINES < GB.PPU.BackgroundPositionY && GB.PPU.BackgroundPositionY < NO_SCANLINES {
+		GB.PPU.IncrementCounter()
+		GB.StatInterrupt()
 
 	} else {
 		// Reset PPU Values
