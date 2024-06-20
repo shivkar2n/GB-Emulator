@@ -50,23 +50,17 @@ func (MMU *MMU) Write(val int, addr int) {
 // 		return int(m.Ram[addr])
 
 // 	} else if addr >= 0xA000 && addr <= 0xBFFF {
-// 		if m.enableExtRam {
+// 		if m.enableExtRam && m.Rom[0x147] == 0x02 {
 // 			m.highBank = m.romBank & m.bitMask
 // 			return int(m.Rom[0x4000*m.highBank+addr-0x4000])
 // 		}
 // 		return 0xFF
 
-// 	} else if addr >= 0xC000 && addr <= 0xDFFF {
-// 		return int(m.Ram[addr])
-
-// 	} else if addr >= 0xE000 && addr <= 0xFE9F {
-// 		return int(m.Ram[addr])
-
-// 	} else if addr >= 0xFEA0 && addr <= 0xFEFF {
-// 		return 0
-
-// 	} else if addr >= 0xFF00 && addr <= 0xFFFF {
-// 		return int(m.Ram[addr])
+// 	} else if addr >= 0xC000 && addr <= 0xFFFF {
+// 		if addr == 0xFF4D {
+// 		return 0xFF
+// 		}
+// 			return int(m.Ram[addr])
 // 	}
 
 // 	return 0
@@ -90,7 +84,7 @@ func (MMU *MMU) Write(val int, addr int) {
 // 		m.Ram[addr] = byte(val)
 
 // 	} else if addr >= 0x4000 && addr <= 0x5FFF {
-// 		m.ramBank = m.ramBank | (val & 0x3)
+// 		m.ramBank = val & 0x3
 // 		m.Ram[addr] = byte(val)
 
 // 	} else if addr >= 0x6000 && addr <= 0x7FFF {
@@ -102,13 +96,10 @@ func (MMU *MMU) Write(val int, addr int) {
 
 // 	} else if addr >= 0xA000 && addr <= 0xBFFF {
 // 		if m.enableExtRam {
+// 			m.Ram[0xA000+addr] = byte(val)
 // 		}
 
-// 	} else if addr >= 0xC000 && addr <= 0xDFFF {
-// 		m.Ram[addr] = byte(val)
-
-// 	} else if addr >= 0xFF00 && addr <= 0xFFFF {
+// 	} else if addr >= 0xC000 && addr <= 0xFFFF {
 // 		m.Ram[addr] = byte(val)
 // 	}
-
 // }
