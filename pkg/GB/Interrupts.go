@@ -45,46 +45,60 @@ func (GB *GB) ResetIFBit(offset int) { // Reset interrupt flag bit
 	GB.MMU.Write(GB.MMU.Read(IF)&k, IF)
 }
 
-func (GB *GB) InterruptHandler(awake bool) (int, bool) {
+func (GB *GB) InterruptHandler() {
 	if GB.CPU.IME {
 		if GB.GetIEBit(0) == 1 && GB.GetIFBit(0) == 1 { // VBlank
 			GB.CPU.IME = false
 			// fmt.Printf("V-Blank Interrupt!\t")
-			GB.CALLN8(0x40)
+			GB.PUSHN16(GB.CPU.Reg.Read("PC"))
+			GB.JPN16(0x40)
 			GB.ResetIFBit(0)
-			return 20, true
+			GB.IncrementTimer(20)
+			GB.CPU.Awake = true
+			GB.CPU.InterruptHit = true
 		}
 		if GB.GetIEBit(1) == 1 && GB.GetIFBit(1) == 1 { // LCD STAT
 			GB.CPU.IME = false
 			// fmt.Printf("LCD Interrupt!\n")
-			GB.CALLN8(0x48)
+			GB.PUSHN16(GB.CPU.Reg.Read("PC"))
+			GB.JPN16(0x48)
 			GB.ResetIFBit(1)
-			return 20, true
+			GB.IncrementTimer(20)
+			GB.CPU.Awake = true
+			GB.CPU.InterruptHit = true
 		}
 		if GB.GetIEBit(2) == 1 && GB.GetIFBit(2) == 1 { // Timer
 			GB.CPU.IME = false
 			// fmt.Printf("Timer Interrupt!\n")
-			GB.CALLN8(0x50)
+			GB.PUSHN16(GB.CPU.Reg.Read("PC"))
+			GB.JPN16(0x50)
+			GB.IncrementTimer(20)
 			GB.ResetIFBit(2)
-			return 20, true
+			GB.CPU.Awake = true
+			GB.CPU.InterruptHit = true
 		}
 		if GB.GetIEBit(3) == 1 && GB.GetIFBit(3) == 1 { // Serial
 			GB.CPU.IME = false
 			// fmt.Printf("Serial Interrupt!\t")
-			GB.CALLN8(0x58)
+			GB.PUSHN16(GB.CPU.Reg.Read("PC"))
+			GB.JPN16(0x58)
 			GB.ResetIFBit(3)
-			return 20, true
+			GB.IncrementTimer(20)
+			GB.CPU.Awake = true
+			GB.CPU.InterruptHit = true
 
 		}
 		if GB.GetIEBit(4) == 1 && GB.GetIFBit(4) == 1 { // Joypad
 			GB.CPU.IME = false
 			// fmt.Printf("Joypad Interrupt!\t")
-			GB.CALLN8(0x60)
+			GB.PUSHN16(GB.CPU.Reg.Read("PC"))
+			GB.JPN16(0x60)
 			GB.ResetIFBit(4)
-			return 20, true
+			GB.IncrementTimer(20)
+			GB.CPU.Awake = true
+			GB.CPU.InterruptHit = true
 		}
-	} else if !GB.CPU.IME && !awake && (GB.MMU.Read(IF)&GB.MMU.Read(IE)) != 0 {
-		return 0, true
+	} else if !GB.CPU.IME && !GB.CPU.Awake && (GB.MMU.Read(IF)&GB.MMU.Read(IE)) != 0 {
+		GB.CPU.Awake = true
 	}
-	return 0, awake
 }

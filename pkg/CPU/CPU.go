@@ -4,21 +4,20 @@ type CPU struct {
 	Reg                        Register
 	Sysclk, TotalCycles, Level int
 	IME                        bool
+	Curr                       Instruction
+	Awake                      bool
+	InterruptHit               bool
+}
+
+type Instruction struct {
+	Opcode func() int
+	Length int
+	Cycles int
+	Name   string
 }
 
 type Register struct {
 	FA, CB, ED, LH, PC, SP [2]byte
-}
-
-func InitRegister() Register {
-	return Register{
-		FA: [2]byte{byte(0xB0), byte(0x01)},
-		CB: [2]byte{byte(0x13), byte(0x00)},
-		LH: [2]byte{byte(0x4D), byte(0x01)},
-		SP: [2]byte{byte(0xFE), byte(0xFF)},
-		PC: [2]byte{byte(0x00), byte(0x01)},
-		ED: [2]byte{byte(0xD8), byte(0x00)},
-	}
 }
 
 func (r *Register) Read(name string) int {
@@ -120,10 +119,25 @@ func (r *Register) Write(val int, name string) {
 
 func Init() *CPU {
 	cpu := CPU{
-		Reg:    InitRegister(),
+		Reg: Register{
+			FA: [2]byte{byte(0xB0), byte(0x01)},
+			CB: [2]byte{byte(0x13), byte(0x00)},
+			LH: [2]byte{byte(0x4D), byte(0x01)},
+			SP: [2]byte{byte(0xFE), byte(0xFF)},
+			PC: [2]byte{byte(0x00), byte(0x01)},
+			ED: [2]byte{byte(0xD8), byte(0x00)},
+		},
 		IME:    false,
 		Sysclk: 0xABCC,
 		Level:  0,
+		Awake:  true,
+		Curr: Instruction{
+			Opcode: nil,
+			Length: 0,
+			Cycles: 0,
+			Name:   "",
+		},
+		InterruptHit: false,
 	}
 	return &cpu
 }
@@ -192,6 +206,10 @@ func (CPU *CPU) CheckCC(cc string) bool { // Check condition
 	return false
 }
 
-func (CPU *CPU) IncrementCounter(val int) {
-	CPU.Reg.Write(CPU.Reg.Read("PC")+val, "PC")
+func (CPU *CPU) IncrementCounter() {
+	CPU.Reg.Write(CPU.Reg.Read("PC")+CPU.Curr.Length, "PC")
+}
+
+func (CPU *CPU) DecrementCounter() {
+	CPU.Reg.Write(CPU.Reg.Read("PC")-CPU.Curr.Length, "PC")
 }

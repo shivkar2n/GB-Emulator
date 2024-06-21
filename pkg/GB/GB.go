@@ -12,6 +12,10 @@ const (
 	JOYP           = 0xFF00
 	SERIAL         = 0xFF01
 	SC             = 0xFF02
+	DIV            = 0xFF04
+	TIMA           = 0xFF05
+	TMA            = 0xFF06
+	TAC            = 0xFF07
 	FRAME_RATE     = 60
 	CPU_CLOCK_RATE = 4194304
 )
@@ -57,7 +61,7 @@ func (GB *GB) LogSerialIO() {
 	}
 }
 
-func (GB *GB) StateInfo(opcode string) { // Get info about state of Console
+func (GB *GB) StateInfo() { // Get info about state of Console
 	a := GB.CPU.Reg.Read("A")
 	f := GB.CPU.Reg.Read("F")
 	b := GB.CPU.Reg.Read("B")
@@ -82,25 +86,24 @@ func (GB *GB) StateInfo(opcode string) { // Get info about state of Console
 }
 
 func (GB *GB) Run() {
-	GB.MMU.Ram[JOYP] = byte(0xFF)
-	awake := true
 	for 1 == 1 {
 		if GB.PPU.Frame < FRAME_RATE {
-			cycles := 0
-			length := 0
 			// opcode := ""
 			for GB.CPU.TotalCycles < CPU_CLOCK_RATE/(FRAME_RATE*NO_SCANLINES) {
-				if awake {
-					_, length, cycles, awake = GB.ExecuteOpcode()
-					// GB.StateInfo(opcode)
-					GB.IncrementTimer(cycles)
-					GB.CPU.IncrementCounter(length)
+				if GB.CPU.Awake {
+					GB.Fetch()
+					GB.InterruptHandler()
+					if GB.CPU.InterruptHit { // Reset Fetch-Execute cycle on interrupt
+						GB.CPU.InterruptHit = false
+						continue
+					}
+					GB.Execute()
+					GB.StateInfo()
 
 				} else { // Stall CPU until it recieves interrupt (Sleep mode)
 					GB.IncrementTimer(4)
+					GB.InterruptHandler()
 				}
-				cycles, awake = GB.InterruptHandler(awake)
-				GB.IncrementTimer(cycles)
 			}
 			GB.CPU.TotalCycles = GB.CPU.TotalCycles % (CPU_CLOCK_RATE / (FRAME_RATE * NO_SCANLINES))
 			GB.LogSerialIO()
