@@ -4,6 +4,15 @@ type CPU struct {
 	Reg                        Register
 	Sysclk, TotalCycles, Level int
 	IME                        bool
+	Curr                       Instruction
+	Awake                      bool
+}
+
+type Instruction struct {
+	Opcode func() int
+	Length int
+	Cycles int
+	Name   string
 }
 
 type Register struct {
@@ -124,6 +133,13 @@ func Init() *CPU {
 		IME:    false,
 		Sysclk: 0xABCC,
 		Level:  0,
+		Awake:  true,
+		Curr: Instruction{
+			Opcode: nil,
+			Length: 0,
+			Cycles: 0,
+			Name:   "",
+		},
 	}
 	return &cpu
 }
@@ -192,6 +208,10 @@ func (CPU *CPU) CheckCC(cc string) bool { // Check condition
 	return false
 }
 
-func (CPU *CPU) IncrementCounter(val int) {
-	CPU.Reg.Write(CPU.Reg.Read("PC")+val, "PC")
+func (CPU *CPU) IncrementCounter() {
+	CPU.Reg.Write(CPU.Reg.Read("PC")+CPU.Curr.Length, "PC")
+}
+
+func (CPU *CPU) DecrementCounter() {
+	CPU.Reg.Write(CPU.Reg.Read("PC")-CPU.Curr.Length, "PC")
 }

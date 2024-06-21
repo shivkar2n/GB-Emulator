@@ -4,6 +4,7 @@ import "github.com/veandco/go-sdl2/sdl"
 
 const (
 	LCD_STAT          = 0xFF41
+	LY                = 0xFF44
 	LYC               = 0xFF45
 	NO_SCANLINES      = 154
 	NO_REAL_SCANLINES = 144
@@ -61,7 +62,7 @@ func (GB *GB) RenderScanline() {
 
 	} else {
 		// Reset PPU Values
-		GB.MMU.Write(0xFF44, 0)
+		GB.MMU.Write(LY, 0)
 		GB.PPU.BackgroundPositionY = 0
 		GB.PPU.WindowPositionY = 0
 		GB.PPU.ObjectPositionY = -1
