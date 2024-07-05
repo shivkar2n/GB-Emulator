@@ -9,6 +9,8 @@ const (
 	IE             = 0xFFFF
 	IF             = 0xFF0F
 	CARTRIDGE_TYPE = 0x0147
+	MBC0           = 0x00
+	MBC1           = 0x01
 )
 
 type MMU struct {
@@ -20,29 +22,23 @@ type MMU struct {
 	enableExtRam bool
 	zeroBank     int
 	highBank     int
-	bitMask      int
 	ButtonState  byte
 	DpadState    byte
 }
 
 func Init() *MMU { // Load ROM
 	rom, _ := os.ReadFile(os.Args[1])
-	mask := 0
-	for i := 0; i < len(rom)/32768; i++ {
-		mask = mask << 1
-		mask = mask | 1
-	}
 
 	m := &MMU{
-		Rom:         rom,
-		ramBank:     0,
-		romBank:     1,
-		mode:        false,
-		zeroBank:    0,
-		highBank:    0,
-		bitMask:     mask,
-		ButtonState: 0xF,
-		DpadState:   0xF,
+		Rom:          rom,
+		ramBank:      0,
+		romBank:      1,
+		mode:         false,
+		zeroBank:     0,
+		highBank:     0,
+		ButtonState:  0xF,
+		DpadState:    0xF,
+		enableExtRam: false,
 	}
 	copy(m.Ram[:], rom)
 	m.Ram[JOYP] = byte(0xFF)

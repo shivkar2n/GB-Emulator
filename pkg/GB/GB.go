@@ -98,7 +98,7 @@ func (GB *GB) Run() {
 						continue
 					}
 					GB.Execute()
-					GB.StateInfo()
+					// GB.StateInfo()
 
 				} else { // Stall CPU until it recieves interrupt (Sleep mode)
 					GB.IncrementTimer(4)
