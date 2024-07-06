@@ -1,8 +1,7 @@
 package GB
 
 func (GB *GB) Execute() {
-	cycles := GB.CPU.Curr.Opcode()
-	GB.IncrementTimer(cycles)
+	GB.IncrementTimer(GB.CPU.Curr.Opcode())
 }
 
 func (GB *GB) Fetch() {

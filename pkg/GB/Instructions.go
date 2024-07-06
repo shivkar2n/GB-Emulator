@@ -175,10 +175,12 @@ func (GB *GB) DECHL() int { // M[HL] = M[HL] - 1
 	// opcode :=  fmt.Sprintf("DEC (HL)")
 	val := int(int8(GB.GetHLVal() - 1))
 	halfBorrow := GB.GetHLVal()&0x0F - 1
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagDEC(halfBorrow, val)
 	GB.CPU.Curr.Length = 1
-	return 8
+	return 0
 }
 
 func (GB *GB) INCR8(reg string) int { // reg[] = reg[] + 1
@@ -195,10 +197,12 @@ func (GB *GB) INCRHL() int { // M[HL] = M[HL] + 1
 	// opcode :=  fmt.Sprintf("INC (HL)")
 	val := int(int8(GB.GetHLVal() + 1))
 	halfcarry := GB.GetHLVal()&0x0F + 1
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagINC(halfcarry, val)
 	GB.CPU.Curr.Length = 1
-	return 8
+	return 0
 }
 
 func (GB *GB) ORAR8(reg string) int { // reg[A] = reg[A] | reg[]
@@ -370,17 +374,19 @@ func (GB *GB) RLR8(reg string) int { // Rotate bits reg[] left through Flag C
 	GB.CPU.Reg.Write(val, reg)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) RLHL() int { // Rotate bits M[reg[HL]] left through Flag C
 	// opcode :=  fmt.Sprintf("RL (HL)")
 	carry := GB.GetHLVal() >> 7
 	val := int(int8((GB.GetHLVal() << 1) | GB.CPU.GetFlag("C")))
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 func (GB *GB) RLA() int { // Rotate bits reg[A] left through Flag C
@@ -400,17 +406,19 @@ func (GB *GB) RLCR8(reg string) int { // Rotate bits reg[A] left through Flag c
 	GB.CPU.Reg.Write(val, reg)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) RLCHL() int { // Rotate bits M[reg[HL]] left through flag C
 	// opcode :=  fmt.Sprintf("RLC (HL)")
 	carry := GB.GetHLVal() >> 7
 	val := int(int8((GB.GetHLVal() << 1) | carry))
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 func (GB *GB) RLCA() int { // Rotate bits reg[A] left
@@ -430,17 +438,19 @@ func (GB *GB) RRR8(reg string) int { // Rotate bits reg[] right through flag C
 	GB.CPU.Reg.Write(val, reg)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) RRHL() int { // Rotate bits M[reg[HL]] right through flag C
 	// opcode :=  fmt.Sprintf("RR (HL)")
 	carry := GB.GetHLVal() & 0x01
 	val := int(int8((GB.GetHLVal() >> 1) | (GB.CPU.GetFlag("C") << 7)))
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 func (GB *GB) RRA() int { // Rotate bits reg[A] right through flag C
@@ -460,17 +470,19 @@ func (GB *GB) RRCR8(reg string) int { // Rotate reg[] right
 	GB.CPU.Reg.Write(val, reg)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) RRCHL() int { // Rotate M[reg[HL]] right
 	// opcode :=  fmt.Sprintf("RRC (HL)")
 	carry := GB.GetHLVal() & 0x01
 	val := (GB.GetHLVal() >> 1) | (carry << 7)
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 func (GB *GB) RRCA() int { // Rotate reg[A] right
@@ -490,17 +502,19 @@ func (GB *GB) SLAR8(reg string) int { // reg[] = reg[] << 1
 	GB.CPU.Reg.Write(val, reg)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) SLAHL() int { // M[reg[HL]] = M[reg[HL]] << 1
 	// opcode :=  fmt.Sprintf("SLA (HL)")
 	carry := GB.GetHLVal() >> 7
 	val := int(int8(GB.GetHLVal() << 1))
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 func (GB *GB) SRAR8(reg string) int { // reg[] = reg[] >> 1, bit 7 unchanged
@@ -510,17 +524,19 @@ func (GB *GB) SRAR8(reg string) int { // reg[] = reg[] >> 1, bit 7 unchanged
 	GB.CPU.Reg.Write(val, reg)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) SRAHL() int { // M[reg[HL]] = M[reg[HL]] >> 1, bit 7 unchanged
 	// opcode :=  fmt.Sprintf("SRA (HL)")
 	carry := GB.GetHLVal() & 0x01
 	val := (GB.GetHLVal() >> 1) | GB.GetHLVal()&0x80
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 func (GB *GB) SRLR8(reg string) int { // reg[] = reg[] >> 1
@@ -530,17 +546,19 @@ func (GB *GB) SRLR8(reg string) int { // reg[] = reg[] >> 1
 	GB.CPU.Reg.Write(val, reg)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) SRLHL() int { // M[reg[HL]] = M[reg[HL]] >> 1
 	// opcode :=  fmt.Sprintf("SRL (HL)")
 	carry := GB.GetHLVal() & 0x01
 	val := GB.GetHLVal() >> 1
+	GB.IncrementTimer(4)
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagRL(val, carry)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 // OPCODES FOR BITWISE INSTRUCTIONS
@@ -549,7 +567,7 @@ func (GB *GB) BITU3R8(offset int, reg string) int { // if reg[] >> u3 == 0 then 
 	val := (GB.CPU.Reg.Read(reg) >> offset) & 0x01
 	GB.CPU.SetFlagBIT(val)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) BITU3HL(offset int) int { // if M[reg[HL]] >> u3 == 0 then setZeroFlag
@@ -557,7 +575,7 @@ func (GB *GB) BITU3HL(offset int) int { // if M[reg[HL]] >> u3 == 0 then setZero
 	val := (GB.GetHLVal() >> offset) & 0x01
 	GB.CPU.SetFlagBIT(val)
 	GB.CPU.Curr.Length = 2
-	return 8
+	return 4
 }
 
 func (GB *GB) RESU3R8(offset int, reg string) int { // Set bit u3 in reg[] to 0
@@ -571,7 +589,7 @@ func (GB *GB) RESU3R8(offset int, reg string) int { // Set bit u3 in reg[] to 0
 	}
 	GB.CPU.Reg.Write(GB.CPU.Reg.Read(reg)&k, reg)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) RESU3HL(offset int) int { // Set bit u3 in reg[HL] to 0
@@ -583,9 +601,12 @@ func (GB *GB) RESU3HL(offset int) int { // Set bit u3 in reg[HL] to 0
 			k += 1
 		}
 	}
-	GB.SetHLVal(GB.GetHLVal() & k)
+	val := GB.GetHLVal()
+	GB.IncrementTimer(4)
+	GB.SetHLVal(val & k)
+	GB.IncrementTimer(4)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 func (GB *GB) SETU3R8(offset int, reg string) int { // Set bit u3 in reg[] to 1
@@ -596,7 +617,7 @@ func (GB *GB) SETU3R8(offset int, reg string) int { // Set bit u3 in reg[] to 1
 	}
 	GB.CPU.Reg.Write(GB.CPU.Reg.Read(reg)|k, reg)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) SETU3HL(offset int) int { // Set bit u3 in M[reg[HL]] to 1
@@ -605,9 +626,12 @@ func (GB *GB) SETU3HL(offset int) int { // Set bit u3 in M[reg[HL]] to 1
 	for i := 0; i < offset; i++ {
 		k = k << 1
 	}
-	GB.SetHLVal(GB.GetHLVal() | k)
+	val := GB.GetHLVal()
+	GB.IncrementTimer(4)
+	GB.SetHLVal(val | k)
+	GB.IncrementTimer(4)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 func (GB *GB) SWAPR8(reg string) int { // Swap upper, lower 4 bits in reg[]
@@ -618,18 +642,20 @@ func (GB *GB) SWAPR8(reg string) int { // Swap upper, lower 4 bits in reg[]
 	GB.CPU.Reg.Write(val, reg)
 	GB.CPU.SetFlagSWAP(val)
 	GB.CPU.Curr.Length = 2
-	return 4
+	return 0
 }
 
 func (GB *GB) SWAPHL() int { // Swap upper, lower 4 bits in mem[reg[HL]]
 	// opcode :=  fmt.Sprintf("SWAP (HL)")
 	low := GB.GetHLVal() & 0xF
 	high := (GB.GetHLVal() & 0xF0) >> 4
+	GB.IncrementTimer(4)
 	val := low<<4 | high
 	GB.SetHLVal(val)
+	GB.IncrementTimer(4)
 	GB.CPU.SetFlagSWAP(val)
 	GB.CPU.Curr.Length = 2
-	return 12
+	return 0
 }
 
 // OPCODES FOR LOAD INSTRUCTIONS
